@@ -37,8 +37,11 @@ app.config.from_object(config[os.getenv('FLASK_ENV', 'default')])
 # Inicializar extensões do Flask
 # db - ORM para banco de dados
 db.init_app(app)
+# Mostrar a URL para debug
+print(f"DEBUG: SQLALCHEMY_DATABASE_URI = {app.config.get('SQLALCHEMY_DATABASE_URI')}")
 with app.app_context():
     db.create_all()
+    print("DEBUG: Base de dados criada/verificada")
 # csrf - proteção contra ataques CSRF
 csrf = CSRFProtect(app)
 # login_manager - gerenciador de autenticação
