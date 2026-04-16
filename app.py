@@ -1167,5 +1167,6 @@ if __name__ == '__main__':
     
     # Obter porta do ambiente ou usar 5000 como padrão
     port = int(os.environ.get('PORT', 5000))
-    # Iniciar servidor Flask
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # Iniciar servidor Flask (debug=False para producao)
+    debug = os.environ.get('FLASK_ENV') != 'production'
+    app.run(host='0.0.0.0', port=port, debug=debug)
