@@ -1,0 +1,179 @@
+{% include 'partials/header.html' %}
+
+<!-- Main Content - Página de Edição de Anúncio -->
+<main class="main">
+  <div class="container">
+    <div style="max-width: 720px; margin: 0 auto;">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb mb-3">
+        <a href="{{ url_for('home') }}">Início</a>
+        <i class="fas fa-chevron-right separator"></i>
+        <a href="{{ url_for('view_ad', id=anuncio.id) }}">Anúncio</a>
+        <i class="fas fa-chevron-right separator"></i>
+        <span>Editar</span>
+      </nav>
+
+      <!-- Card do Formulário -->
+      <div class="card">
+        <div class="card-header" style="background: var(--primary); color: #fff;">
+          <h2 class="card-title" style="color: #fff; margin-bottom: 0;">Editar Anúncio</h2>
+          <p style="opacity: 0.9; font-size: 14px; margin-top: 4px;">Atualize as informações do seu anúncio</p>
+        </div>
+        <div class="card-body" style="padding: 32px;">
+          
+          <!-- Mensagens de erro -->
+          {% with errors = get_flashed_messages(category_filter=['error']) %}
+            {% if errors %}
+              <div class="alert alert-error mb-4">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  {% for err in errors %}
+                    <span><i class="fas fa-exclamation-circle"></i> {{ err }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+          {% endwith %}
+
+          <!-- Imagens Atuais -->
+          {% if imagens %}
+            <div class="form-group mb-5">
+              <label class="form-label">Imagens Atuais</label>
+              <div class="d-flex flex-wrap gap-3 mt-2">
+                {% for img in imagens %}
+                  <div style="position: relative; width: 120px; height: 100px; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                    <img src="{{ url_for('static', filename='images/uploads/' + img.arquivo) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% if img.principal %}
+                      <span style="position: absolute; bottom: 0; left: 0; right: 0; background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; text-align: center; padding: 2px 0;">PRINCIPAL</span>
+                    {% endif %}
+                    <form action="{{ url_for('delete_image', id=anuncio.id, image_id=img.id) }}" method="POST" style="position: absolute; top: 4px; right: 4px;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn btn-sm btn-danger" style="width: 24px; height: 24px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;" onclick="return confirm('Apagar esta imagem?')">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </form>
+                  </div>
+                {% endfor %}
+              </div>
+              <p class="text-secondary small mt-2">Pode apagar as imagens atuais ou adicionar novas abaixo.</p>
+            </div>
+          {% endif %}
+
+          <!-- Formulário de Edição -->
+          <form action="{{ url_for('edit_ad', id=anuncio.id) }}" method="POST" enctype="multipart/form-data" class="modern-form">
+            <!-- Token CSRF -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <!-- Título -->
+            <div class="form-group">
+              <label class="form-label">Título do Anúncio <span style="color: var(--danger);">*</span></label>
+              <input type="text" name="titulo" class="form-control" style="font-size: 1.125rem; padding: 0.875rem;" required value="{{ anuncio.titulo }}" minlength="5" maxlength="200">
+            </div>
+
+            <!-- Linha de Categoria e Tipo -->
+            <div class="form-row" style="display: flex; gap: 20px;">
+              <div class="form-group flex-1">
+                <label class="form-label">Categoria <span style="color: var(--danger);">*</span></label>
+                <select name="categoria_id" class="filter-select" required style="height: 48px;">
+                  {% for cat in categorias %}
+                    <option value="{{ cat.id }}" {% if cat.id == anuncio.categoria_id %}selected{% endif %}>{{ cat.nome }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label class="form-label">Tipo de Negócio <span style="color: var(--danger);">*</span></label>
+                <select name="tipo" class="filter-select" required style="height: 48px;">
+                  <option value="venda" {% if anuncio.tipo == 'venda' %}selected{% endif %}>Venda</option>
+                  <option value="troca" {% if anuncio.tipo == 'troca' %}selected{% endif %}>Troca</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Linha de Preço e Estado -->
+            <div class="form-row" style="display: flex; gap: 20px;">
+              <div class="form-group flex-1">
+                <label class="form-label">Preço (€)</label>
+                <div style="position: relative;">
+                  <input type="number" name="preco" class="form-control" step="0.01" min="0" value="{{ anuncio.preco if anuncio.preco else 0 }}" style="padding-left: 30px;">
+                  <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);">€</span>
+                </div>
+              </div>
+              <div class="form-group flex-1">
+                <label class="form-label">Estado do Artigo</label>
+                <select name="estado" class="filter-select" style="height: 48px;">
+                  <option value="novo" {% if anuncio.estado == 'novo' %}selected{% endif %}>Novo</option>
+                  <option value="usado_bueno" {% if anuncio.estado == 'usado_bueno' %}selected{% endif %}>Usado - Em bom estado</option>
+                  <option value="usado_regular" {% if anuncio.estado == 'usado_regular' %}selected{% endif %}>Usado - Sinais de uso</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Localização -->
+            <div class="form-group">
+              <label class="form-label">Localização</label>
+              <div style="position: relative;">
+                <input type="text" name="localizacao" class="form-control" value="{{ anuncio.localizacao if anuncio.localizacao else '' }}" style="padding-left: 35px;">
+                <i class="fas fa-map-marker-alt" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+              </div>
+            </div>
+
+            <!-- Descrição -->
+            <div class="form-group">
+              <label class="form-label">Descrição Detalhada <span style="color: var(--danger);">*</span></label>
+              <textarea name="descricao" class="form-control" rows="8" required minlength="20">{{ anuncio.descricao }}</textarea>
+            </div>
+
+            <!-- Novas Imagens -->
+            <div class="form-group">
+              <label class="form-label">Adicionar Mais Fotografias</label>
+              <div class="upload-zone" style="border: 2px dashed var(--border); border-radius: var(--radius-md); padding: 30px; text-align: center; background: #fafafa; cursor: pointer; transition: var(--transition-base);">
+                <i class="fas fa-plus-circle" style="font-size: 32px; color: var(--primary); margin-bottom: 12px;"></i>
+                <p style="font-weight: 600; margin-bottom: 4px;">Clique para adicionar novas imagens</p>
+                <input type="file" name="imagens" class="form-control" multiple accept="image/*" style="display: none;" id="imageInput">
+              </div>
+              <div id="imagePreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+            </div>
+
+            <!-- Botões -->
+            <div class="d-flex gap-3 mt-4 pt-4" style="border-top: 1px solid #f0f2f5;">
+              <a href="{{ url_for('view_ad', id=anuncio.id) }}" class="btn btn-outline flex-1" style="height: 56px; display: flex; align-items: center; justify-content: center;">
+                Cancelar
+              </a>
+              <button type="submit" class="btn btn-primary flex-1 btn-lg" style="height: 56px;">
+                <i class="fas fa-save"></i> Guardar Alterações
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- JavaScript para interatividade -->
+<script>
+  // Toggle upload click
+  document.querySelector('.upload-zone').addEventListener('click', () => {
+    document.getElementById('imageInput').click();
+  });
+
+  // Image preview
+  document.getElementById('imageInput').addEventListener('change', function() {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    if (this.files) {
+      [...this.files].forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const div = document.createElement('div');
+          div.className = 'preview-item';
+          div.style.cssText = 'width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border);';
+          div.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+          preview.appendChild(div);
+        }
+        reader.readAsDataURL(file);
+      });
+    }
+  });
+</script>
+
+{% include 'partials/footer.html' %}

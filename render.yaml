@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: trocas
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --timeout 120
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://trocas_db_user:6zXVOTHix4fqErP9Qn0aYQ95NeRQTWF4@dpg-d7gcqppf9bms73arvtng-a/trocas_db
+      - key: SECRET_KEY
+        value: trocas-secret-key-2026
+      - key: FLASK_ENV
+        value: production
+      - key: PORT
+        value: 3000

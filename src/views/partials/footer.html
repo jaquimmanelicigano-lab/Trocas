@@ -1,0 +1,161 @@
+<!-- Footer - Rodapé da página -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <!-- Marca e descrição -->
+        <div class="footer-brand">
+          <div class="logo mb-2">
+            <i class="fas fa-exchange-alt"></i> <span>Trocas</span>
+          </div>
+          <p class="text-secondary small" style="max-width: 250px; line-height: 1.6;">
+            A sua plataforma de confiança para trocas e vendas seguras em Portugal. Junte-se a milhares de utilizadores.
+          </p>
+          <!-- Links das redes sociais -->
+          <div class="social-links mt-3" style="display: flex; gap: 12px;">
+            <a href="#" class="text-secondary"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="text-secondary"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-secondary"><i class="fab fa-twitter"></i></a>
+          </div>
+        </div>
+        
+        <!-- Links da plataforma -->
+        <div>
+          <h4 class="footer-title">Plataforma</h4>
+          <div class="footer-links">
+            <a href="{{ url_for('home') }}">Página Inicial</a>
+            <a href="{{ url_for('search') }}">Explorar Anúncios</a>
+            <a href="{{ url_for('create_ad') }}">Publicar Agora</a>
+            <a href="{{ url_for('login') }}">Área Pessoal</a>
+          </div>
+        </div>
+        
+        <!-- Links de suporte -->
+        <div>
+          <h4 class="footer-title">Suporte</h4>
+          <div class="footer-links">
+            <a href="{{ url_for('support') }}">Centro de Ajuda</a>
+            <a href="#">Dicas de Segurança</a>
+            <a href="#">Como trocar?</a>
+            <a href="#">Contactos</a>
+          </div>
+        </div>
+        
+        <!-- Links informativos -->
+        <div>
+          <h4 class="footer-title">Informações</h4>
+          <div class="footer-links">
+            <a href="#">Termos e Condições</a>
+            <a href="#">Privacidade</a>
+            <a href="#">Cookies</a>
+            <a href="#">Sobre Nós</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Copyright -->
+      <div class="footer-bottom">
+        <p>&copy; 2026 - Alegria Web Studio. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript para interatividade do site -->
+  <script>
+    // Executa quando o DOM está completamente carregado
+    document.addEventListener('DOMContentLoaded', function() {
+      
+      // === Dropdown do utilizador ===
+      const dropdown = document.getElementById('userDropdown');
+      const trigger = document.getElementById('userDropdownTrigger');
+      const menu = document.getElementById('userDropdownMenu');
+      
+      if (dropdown && trigger && menu) {
+        // Toggle do menu ao clicar no avatar/nome
+        trigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          dropdown.classList.toggle('active');
+        });
+        
+        // Fecha o dropdown ao clicar fora
+        document.addEventListener('click', function(e) {
+          if (!dropdown.contains(e.target)) {
+            dropdown.classList.remove('active');
+          }
+        });
+      }
+      
+      // === Menu mobile ===
+      const mobileToggle = document.querySelector('.mobile-menu-toggle');
+      const navLinks = document.querySelector('.nav-links');
+      
+      if (mobileToggle && navLinks) {
+        mobileToggle.addEventListener('click', function() {
+          navLinks.classList.toggle('active');
+        });
+      }
+      
+    });
+
+    // === Chat Widget Functions ===
+    const chatAnswers = {
+      'publicar': 'Para publicar um anúncio, faça login e clique em "Anunciar" no menu.',
+      'mensagens': 'Para ver as mensagens, clique em "Mensagens" no menu.',
+      'recuperar': 'Se esqueceu a password, clique em "Esqueceu-se?" na página de login.',
+      'editar': 'Para editar o perfil, clique no seu nome no menu e depois em "Perfil".',
+      'favoritos': 'Clique no ícone de coração num anúncio para adicionar aos favoritos.',
+      'imagens': 'Ao criar anúncio, clique na zona de upload para selecionar imagens.',
+      'contactar': 'Visite o anúncio e clique em "Enviar Mensagem" para contactar.',
+      'eliminar': 'Vá ao seu Perfil, encontre o anúncio e clique em "Apagar".'
+    };
+
+    const chatKeywords = {
+      'publicar': 'publicar', 'anúncio': 'publicar', 'anuncio': 'publicar', 'criar': 'publicar',
+      'mensagem': 'mensagens', 'mensagens': 'mensagens', 'chat': 'mensagens',
+      'password': 'recuperar', 'pass': 'recuperar', 'esqueci': 'recuperar',
+      'perfil': 'editar', 'editar': 'editar',
+      'favorito': 'favoritos', 'heart': 'favoritos',
+      'imagem': 'imagens', 'foto': 'imagens',
+      'contactar': 'contactar', 'vendedor': 'contactar',
+      'eliminar': 'eliminar', 'apagar': 'eliminar'
+    };
+
+    function toggleChatWidget() {
+      const widget = document.getElementById('chatWidget');
+      widget.classList.toggle('open');
+    }
+
+    function handleChatKeypress(e) {
+      if (e.key === 'Enter') sendChatWidgetMessage();
+    }
+
+    function sendChatWidgetMessage() {
+      const input = document.getElementById('chatWidgetInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      
+      const container = document.getElementById('chatWidgetMessages');
+      container.innerHTML += '<div class="chat-widget-msg sent">' + msg + '</div>';
+      input.value = '';
+      
+      const response = getChatResponse(msg);
+      setTimeout(() => {
+        container.innerHTML += '<div class="chat-widget-msg received">' + response + '</div>';
+        container.scrollTop = container.scrollHeight;
+      }, 400);
+      
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function getChatResponse(msg) {
+      const lower = msg.toLowerCase();
+      for (let key in chatAnswers) {
+        if (lower.includes(key)) return chatAnswers[key];
+      }
+      for (let k in chatKeywords) {
+        if (lower.includes(k)) return chatAnswers[chatKeywords[k]];
+      }
+      return 'Desculpe, não entendi. Pode perguntar sobre publicar anúncios, mensagens, recuperar password, etc.';
+    }
+  </script>
+</body>
+</html>

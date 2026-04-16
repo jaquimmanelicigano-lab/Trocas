@@ -1,0 +1,44 @@
+{% include 'partials/header.html' %}
+
+<!-- Main Content - Página de Mensagens -->
+<main class="main">
+  <div class="container">
+    <div class="section-header mb-4">
+      <h1 class="section-title">As Minhas Mensagens</h1>
+    </div>
+
+    {% if conversas %}
+      <div class="conversations-list">
+        {% for conv in conversas.values() %}
+          <a href="{{ url_for('conversation', contact_id=conv.utilizador.id) }}" class="conversation-item {% if conv.nao_lidas > 0 %}unread{% endif %}">
+            <div class="conversation-avatar">
+              {{ conv.utilizador.nome[0]|upper }}
+            </div>
+            <div class="conversation-content">
+              <div class="d-flex justify-between align-center">
+                <span class="conversation-name">{{ conv.utilizador.nome }}</span>
+                <span class="conversation-time">{{ conv.mensagem.created_at.strftime('%d %b') }}</span>
+              </div>
+              <p class="conversation-preview">
+                <span style="color: var(--primary); font-weight: 700; font-size: 13px;">[{{ conv.anuncio.titulo }}]</span> 
+                {{ conv.mensagem.mensagem[:50] }}{% if conv.mensagem.mensagem|length > 50 %}...{% endif %}
+              </p>
+            </div>
+            {% if conv.nao_lidas > 0 %}
+              <div style="width: 10px; height: 10px; background: var(--primary); border-radius: 50%;"></div>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-envelope-open"></i></div>
+        <h3>Ainda sem mensagens</h3>
+        <p>As suas conversas com outros utilizadores aparecerão aqui.</p>
+        <a href="{{ url_for('search') }}" class="btn btn-primary mt-2">Começar a Explorar</a>
+      </div>
+    {% endif %}
+  </div>
+</main>
+
+{% include 'partials/footer.html' %}

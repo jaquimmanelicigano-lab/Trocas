@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logs - Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="display: block;">
+  <%- include('../partials/header') %>
+
+  <main class="main">
+    <div class="container">
+      <h1>Logs de Administração</h1>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Admin</th>
+            <th>Ação</th>
+            <th>Tabela</th>
+            <th>Detalhes</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% logs.forEach(function(log) { %>
+            <tr>
+              <td><%= log.id %></td>
+              <td><%= log.admin_nome %></td>
+              <td><%= log.acao %></td>
+              <td><%= log.tabela_afetada || '-' %></td>
+              <td><%= log.detalhes || '-' %></td>
+              <td><%= new Date(log.created_at).toLocaleString('pt-PT') %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+
+      <% if (pagination.totalPages > 1) { %>
+        <div class="pagination">
+          <% for(var i = 1; i <= pagination.totalPages; i++) { %>
+            <a href="?page=<%= i %>" class="<%= pagination.page === i ? 'active' : '' %>"><%= i %></a>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

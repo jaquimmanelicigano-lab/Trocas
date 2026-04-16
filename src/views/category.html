@@ -1,0 +1,84 @@
+{% include 'partials/header.html' %}
+
+<!-- Main Content - Página de Categoria -->
+<main class="main">
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb mb-3">
+      <a href="{{ url_for('home') }}">Início</a>
+      <i class="fas fa-chevron-right separator"></i>
+      <span>{{ categoria.nome }}</span>
+    </nav>
+
+    <!-- Categoria Header -->
+    <div class="section-header mb-4">
+      <div class="d-flex align-center gap-2">
+        <div class="cat-icon" style="width: 48px; height: 48px; margin-bottom: 0; border-radius: 12px;">
+          <i class="fas {{ categoria.icone if categoria.icone else 'fa-folder' }}"></i>
+        </div>
+        <div>
+          <h1 class="section-title">{{ categoria.nome }}</h1>
+        </div>
+      </div>
+      <a href="{{ url_for('create_ad') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Criar Anúncio
+      </a>
+    </div>
+
+    <!-- Descrição da Categoria -->
+    {% if categoria.descricao %}
+      <div class="card mb-4" style="background: rgba(59, 130, 246, 0.03); border: none;">
+        <div class="card-body">
+          <p class="text-secondary" style="font-size: 14px;">{{ categoria.descricao }}</p>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Anúncios da Categoria -->
+    {% if anuncios %}
+      <div class="ads-grid">
+        {% for ad in anuncios %}
+          <a href="{{ url_for('view_ad', id=ad.id) }}" class="ad-card">
+            <div class="ad-img">
+              {% if ad.primeira_imagem %}
+                <img src="{{ url_for('static', filename='images/uploads/' + ad.primeira_imagem) }}" alt="{{ ad.titulo }}" loading="lazy">
+              {% else %}
+                <div class="ad-no-img">
+                  <i class="fas fa-image"></i>
+                </div>
+              {% endif %}
+              <span class="ad-badge {{ ad.tipo }}">{{ 'Venda' if ad.tipo == 'venda' else 'Troca' }}</span>
+            </div>
+            <div class="ad-info">
+              <h3 class="ad-title">{{ ad.titulo }}</h3>
+              <div class="ad-price {% if ad.tipo == 'troca' %}troca{% endif %}">
+                {% if ad.tipo == 'venda' %}
+                  {% if ad.preco and ad.preco|float > 0 %}
+                    {{ "%.2f"|format(ad.preco|float) }} €
+                  {% else %}
+                    Grátis
+                  {% endif %}
+                {% else %}
+                  <i class="fas fa-exchange-alt"></i> Troca
+                {% endif %}
+              </div>
+              <div class="ad-meta">
+                <span><i class="fas fa-map-marker-alt"></i> {{ ad.localizacao if ad.localizacao else 'Portugal' }}</span>
+                <span><i class="far fa-clock"></i> {{ ad.created_at.strftime('%d %b') }}</span>
+              </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-folder-open"></i></div>
+        <h3>Nenhum anúncio nesta categoria</h3>
+        <p>Seja o primeiro a publicar nesta categoria!</p>
+        <a href="{{ url_for('create_ad') }}" class="btn btn-primary mt-2">Criar Anúncio</a>
+      </div>
+    {% endif %}
+  </div>
+</main>
+
+{% include 'partials/footer.html' %}

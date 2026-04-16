@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categorias - Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="display: block;">
+  <%- include('../partials/header') %>
+
+  <main class="main">
+    <div class="container">
+      <h1>Categorias</h1>
+
+      <!-- Create Category -->
+      <div class="card mb-3">
+        <div class="card-header">
+          <h3 class="card-title">Criar Categoria</h3>
+        </div>
+        <div class="card-body">
+          <form action="/admin/categorias/criar" method="POST">
+            <div class="filters-grid">
+              <div>
+                <input type="text" name="nome" class="form-control" placeholder="Nome" required>
+              </div>
+              <div>
+                <input type="text" name="descricao" class="form-control" placeholder="Descrição">
+              </div>
+              <div>
+                <input type="text" name="icone" class="form-control" placeholder="Ícone (fa-...)" value="fa-folder">
+              </div>
+              <div>
+                <input type="number" name="ordem" class="form-control" placeholder="Ordem" value="0">
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Criar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Categories List -->
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Slug</th>
+            <th>Ícone</th>
+            <th>Anúncios</th>
+            <th>Ordem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% categorias.forEach(function(cat) { %>
+            <tr>
+              <td><%= cat.id %></td>
+              <td><%= cat.nome %></td>
+              <td><%= cat.slug %></td>
+              <td><i class="fas <%= cat.icone %>"></i></td>
+              <td><span class="badge badge-info"><%= cat.total_anuncios %></span></td>
+              <td><%= cat.ordem %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

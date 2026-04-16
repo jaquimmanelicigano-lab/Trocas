@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Trocas</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Estilos específicos do admin */
+    body { display: flex; min-height: 100vh; margin: 0; }
+    .admin-wrapper { display: flex; width: 100%; }
+    .admin-sidebar { 
+      width: 250px; 
+      flex-shrink: 0; 
+      background: #1f2937;
+      color: white;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .admin-main { 
+      flex: 1; 
+      padding: 30px; 
+      overflow-y: auto; 
+      margin-left: 250px;
+      background: var(--bg-body);
+      min-height: 100vh;
+    }
+    .admin-nav a {
+      display: block;
+      padding: 12px 20px;
+      color: #d1d5db;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+      border-left: 3px solid transparent;
+    }
+    .admin-nav a:hover,
+    .admin-nav a.active {
+      background: #374151;
+      color: white;
+      border-left-color: var(--primary);
+    }
+    .admin-nav a i {
+      margin-right: 10px;
+      width: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-wrapper">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div style="padding: 20px; border-bottom: 1px solid #374151;">
+        <a href="{{ url_for('home') }}" style="font-size: 24px; font-weight: 700; color: white; text-decoration: none;">
+          <i class="fas fa-exchange-alt"></i> Trocas
+        </a>
+        <p style="color: #9ca3af; font-size: 12px; margin-top: 5px;">Painel de Administração</p>
+      </div>
+      
+      <!-- Navigation -->
+      <nav class="admin-nav" style="padding: 20px 0;">
+        <a href="{{ url_for('admin_dashboard') }}" class="{% if page == 'admin' %}active{% endif %}">
+          <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="{{ url_for('admin_users') }}" class="{% if page == 'users' %}active{% endif %}">
+          <i class="fas fa-users"></i> Utilizadores
+        </a>
+        <a href="{{ url_for('admin_ads') }}" class="{% if page == 'ads' %}active{% endif %}">
+          <i class="fas fa-box"></i> Anúncios
+        </a>
+        <a href="{{ url_for('admin_categories') }}" class="{% if page == 'categories' %}active{% endif %}">
+          <i class="fas fa-folder"></i> Categorias
+        </a>
+        <a href="{{ url_for('admin_reports') }}" class="{% if page == 'reports' %}active{% endif %}">
+          <i class="fas fa-flag"></i> Denúncias
+        </a>
+        <a href="{{ url_for('admin_logs') }}" class="{% if page == 'logs' %}active{% endif %}">
+          <i class="fas fa-history"></i> Logs
+        </a>
+      </nav>
+      
+      <!-- User Info -->
+      <div style="padding: 20px; border-top: 1px solid #374151; position: absolute; bottom: 0; width: 250px; box-sizing: border-box;">
+        <div style="display: flex; align-items: center; gap: 10px; color: white; margin-bottom: 10px;">
+          <div class="user-avatar">{{ current_user.nome[0]|upper }}</div>
+          <div>
+            <div style="font-weight: 500;">{{ current_user.nome }}</div>
+            <div style="font-size: 12px; color: #9ca3af;">Admin</div>
+          </div>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn btn-sm" style="width: 100%; background: #374151; color: white; display: block; text-align: center; padding: 8px 0; border-radius: 4px; text-decoration: none;">
+          <i class="fas fa-sign-out-alt"></i> Sair
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <!-- Flash Messages - Success -->
+      {% with success = get_flashed_messages(category_filter=['success']) %}
+        {% if success %}
+          {% for msg in success %}
+            <div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      
+      <!-- Flash Messages - Error -->
+      {% with errors = get_flashed_messages(category_filter=['error']) %}
+        {% if errors %}
+          {% for msg in errors %}
+            <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> {{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Page Content -->
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>
