@@ -1,7 +1,6 @@
 # ============================================
 # Dependências Python - Projeto Trocas
 # ============================================
-# Execute: pip install -r requirements.txt
 
 # Framework web Flask
 Flask==3.0.0
@@ -11,10 +10,8 @@ Flask-SQLAlchemy==3.1.1
 Flask-Login==0.6.3
 # Formulários web
 Flask-WTF==1.2.1
-# driver MySQL para Flask
-Flask-MySQLdb==2.0.0
-# Conector MySQL para Python
-mysql-connector-python==8.2.0
+# Driver PostgreSQL
+psycopg2-binary==2.9.9
 # Biblioteca para hash de passwords
 bcrypt==4.1.1
 # Carregar variáveis de ambiente
@@ -23,9 +20,5 @@ python-dotenv==1.0.0
 Werkzeug==3.0.1
 # Validação de emails
 email-validator==2.1.0
-# Processamento de imagens
-Pillow==10.1.0
 # Servidor WSGI para produção
 gunicorn==21.2.0
-# Driver PostgreSQL para Python
-psycopg2-binary==2.9.9
