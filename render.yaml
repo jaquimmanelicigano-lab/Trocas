@@ -2,8 +2,8 @@ services:
   - type: web
     name: trocas
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --workers 1 --timeout 120
+    buildCommand: pip install -r requirements.txt && python app.py
+    startCommand: python app.py
     envVars:
       - key: DATABASE_URL
         value: postgresql://trocas_db_user:6zXVOTHix4fqErP9Qn0aYQ95NeRQTWF4@dpg-d7gcqppf9bms73arvtng-a/trocas_db
