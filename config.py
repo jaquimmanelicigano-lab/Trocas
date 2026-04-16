@@ -17,8 +17,13 @@ class Config:
     # MYSQL_PASSWORD = os.environ.get('DB_PASSWORD') or ''
     # MYSQL_DB = os.environ.get('DB_NAME') or 'trocas_db'
     
-    # URI de conexão SQLAlchemy - usa variável DATABASE_URL (PostgreSQL no Render) ou MySQL local
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql://root:teste123@127.0.0.1:3306/trocas_db'
+    # URI de conexão SQLAlchemy - usa variavel DATABASE_URL (PostgreSQL no Render) ou MySQL local
+    # Para psycopg3, usar postgresql+psycopg://
+    db_url = os.environ.get('DATABASE_URL') or 'mysql://root:teste123@127.0.0.1:3306/trocas_db'
+    # Trocar para psycopg se for postgresql
+    if db_url.startswith('postgresql://'):
+        db_url = db_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+    SQLALCHEMY_DATABASE_URI = db_url
     # Desativar rastreamento de modificações para melhor desempenho
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
