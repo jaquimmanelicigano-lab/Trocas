@@ -1,0 +1,29 @@
+{% include 'partials/header.html' %}
+
+<!-- Main Content - Página de Erro -->
+<main class="main">
+  <div class="container d-flex justify-center align-center" style="min-height: calc(100vh - var(--header-height) - 150px);">
+    <div class="empty-state" style="max-width: 500px;">
+      <!-- Icone de erro -->
+      <div class="empty-state-icon" style="background: #ffebe9; color: #ef4444;">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      
+      <!-- Mensagem de erro -->
+      <h3 style="font-size: 24px; margin-bottom: 8px;">{{ error if error else 'Ocorreu um Erro' }}</h3>
+      <p class="text-secondary" style="margin-bottom: 24px;">Pedimos desculpa, mas algo não correu como esperado. A nossa equipa foi notificada e está a trabalhar nisso.</p>
+      
+      <!-- Botões de navegação -->
+      <div class="d-flex gap-2 justify-center">
+        <a href="{{ url_for('home') }}" class="btn btn-primary">
+          <i class="fas fa-home"></i> Ir para o Início
+        </a>
+        <button onclick="window.history.back()" class="btn btn-outline">
+          <i class="fas fa-arrow-left"></i> Voltar Atrás
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+{% include 'partials/footer.html' %}

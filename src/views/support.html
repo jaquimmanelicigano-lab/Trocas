@@ -1,0 +1,515 @@
+{% include 'partials/header.html' %}
+
+<!-- Main Content - Página do Assistente de Suporte -->
+<main class="main">
+  <div class="container">
+    <div class="section-header mb-4">
+      <h1 class="section-title"><i class="fas fa-headset"></i> Centro de Ajuda</h1>
+      <p class="text-secondary">Pergunte ao nosso assistente virtual ou veja as perguntas frequentes</p>
+    </div>
+
+    <div style="max-width: 900px; margin: 0 auto;">
+      <!-- Quick Questions - Perguntas Rápidas -->
+      <div class="card mb-4">
+        <div class="card-header" style="background: var(--primary); color: white;">
+          <h3 class="card-title" style="color: white; margin: 0;">Perguntas Frequentes</h3>
+        </div>
+        <div class="card-body">
+          <div class="faq-grid">
+            <!-- FAQ Category: Anúncios -->
+            <button class="faq-item" onclick="askQuestion('publicar')">
+              <i class="fas fa-plus-circle"></i>
+              <span>Como publicar anúncios?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('editar_anuncio')">
+              <i class="fas fa-edit"></i>
+              <span>Como editar um anúncio?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('eliminar')">
+              <i class="fas fa-trash"></i>
+              <span>Como eliminar o meu anúncio?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('imagens')">
+              <i class="fas fa-image"></i>
+              <span>Como adicionar imagens?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('estado')">
+              <i class="fas fa-star"></i>
+              <span>Como definir o estado do artigo?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('preco')">
+              <i class="fas fa-euro-sign"></i>
+              <span>Como definir o preço?</span>
+            </button>
+            
+            <!-- FAQ Category: Mensagens -->
+            <button class="faq-item" onclick="askQuestion('mensagens')">
+              <i class="fas fa-envelope"></i>
+              <span>Como ver as minhas mensagens?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('contactar')">
+              <i class="fas fa-comments"></i>
+              <span>Como contactar um vendedor?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('responder')">
+              <i class="fas fa-reply"></i>
+              <span>Como responder a uma mensagem?</span>
+            </button>
+            
+            <!-- FAQ Category: Conta -->
+            <button class="faq-item" onclick="askQuestion('recuperar')">
+              <i class="fas fa-key"></i>
+              <span>Como recuperar a password?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('editar')">
+              <i class="fas fa-user-edit"></i>
+              <span>Como editar o meu perfil?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('registar')">
+              <i class="fas fa-user-plus"></i>
+              <span>Como criar uma conta?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('eliminar_conta')">
+              <i class="fas fa-user-slash"></i>
+              <span>Como eliminar a minha conta?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('login')">
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Como fazer login?</span>
+            </button>
+            
+            <!-- FAQ Category: Favoritos -->
+            <button class="faq-item" onclick="askQuestion('favoritos')">
+              <i class="fas fa-heart"></i>
+              <span>Como guardar favoritos?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('ver_favoritos')">
+              <i class="fas fa-heart-broken"></i>
+              <span>Onde vejo os meus favoritos?</span>
+            </button>
+            
+            <!-- FAQ Category: Pesquisar -->
+            <button class="faq-item" onclick="askQuestion('pesquisar')">
+              <i class="fas fa-search"></i>
+              <span>Como pesquisar anúncios?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('categoria')">
+              <i class="fas fa-folder"></i>
+              <span>Como filtrar por categoria?</span>
+            </button>
+            <button class="faq-item" onclick="askQuestion('localizacao')">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Como filtrar por localização?</span>
+            </button>
+            
+            <!-- FAQ Category: Denúncias -->
+            <button class="faq-item" onclick="askQuestion('denunciar')">
+              <i class="fas fa-flag"></i>
+              <span>Como denunciar um anúncio?</span>
+            </button>
+            
+            <!-- FAQ Category: Regras -->
+            <button class="faq-item" onclick="askQuestion('regras')">
+              <i class="fas fa-gavel"></i>
+              <span>Quais são as regras?</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Area - Área do Chat -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-robot"></i> Assistente Virtual</h3>
+        </div>
+        <div class="chat-messages" id="chatMessages" style="height: 350px; padding: 20px; overflow-y: auto; background: #f8fafc;">
+          <div class="message received">
+            <div class="message-bubble">
+              <strong>Olá! Sou o assistente do Trocas.pt</strong> 🤖<br><br>
+              Posso ajudá-lo com dúvidas sobre a plataforma. Escolha uma pergunta frequente abaixo ou digite a sua questão.<br><br>
+              <em>Exemplos: "como publicar", "ver mensagens", "recuperar password"</em>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-container" style="padding: 15px; border-top: 1px solid var(--border);">
+          <div class="chat-input" style="display: flex; gap: 10px;">
+            <input type="text" id="chatInput" placeholder="Digite a sua pergunta..." style="flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 25px; outline: none;">
+            <button onclick="sendMessage()" class="btn btn-primary" style="border-radius: 50%; width: 44px; height: 44px; padding: 0;">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+          <!-- Quick Reply Buttons -->
+          <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px;">
+            <button class="quick-reply-btn" onclick="askQuestion('publicar')">📝 Publicar anúncio</button>
+            <button class="quick-reply-btn" onclick="askQuestion('mensagens')">💬 Minhas mensagens</button>
+            <button class="quick-reply-btn" onclick="askQuestion('recuperar')">🔑 Recuperar password</button>
+            <button class="quick-reply-btn" onclick="askQuestion('favoritos')">❤️ Favoritos</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Support -->
+      <div class="text-center mt-4">
+        <p class="text-secondary">Precisa de mais ajuda? <a href="mailto:suporte@trocas.pt">Contacte-nos</a></p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<style>
+/* Grid de botões de FAQ */
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+/* Estilo dos botões de FAQ */
+.faq-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+  font-size: 13px;
+  color: var(--text-main);
+}
+
+/* Efeito hover nos botões de FAQ */
+.faq-item:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Ícones nos botões de FAQ */
+.faq-item i {
+  font-size: 16px;
+  color: var(--primary);
+  width: 20px;
+  text-align: center;
+}
+
+/* Ícone branco no hover */
+.faq-item:hover i {
+  color: white;
+}
+
+/* Estilo das mensagens */
+.message {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Alinhamento das mensagens enviadas */
+.message.sent {
+  align-items: flex-end;
+}
+
+/* Alinhamento das mensagens recebidas */
+.message.received {
+  align-items: flex-start;
+}
+
+/* Nome do remetente */
+.message-sender {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+/* Nome do remetente nas mensagens enviadas */
+.message.sent .message-sender {
+  color: var(--primary);
+}
+
+/* Bolha de mensagem */
+.message-bubble {
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Bolha das mensagens enviadas (cor primária) */
+.message.sent .message-bubble {
+  background: var(--primary);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+/* Bolha das mensagens recebidas (branco com borda) */
+.message.received .message-bubble {
+  background: white;
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+/* Hora da mensagem */
+.message-time {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Botões de resposta rápida */
+.quick-reply-btn {
+  padding: 8px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--text-main);
+}
+
+/* Efeito hover nos botões de resposta rápida */
+.quick-reply-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+</style>
+
+<script>
+/* FAQ Answers - Respostas Completas das Perguntas Frequentes */
+const faqAnswers = {
+  // Anúncios
+  'publicar': 'Para publicar um anúncio, faça login e clique em "Anunciar" no menu superior. Preencha os dados do produto (título, descrição, preço), selecione a categoria, o tipo (venda ou troca) e o estado do artigo. Adicione até 5 imagens e clique em "Publicar". O seu anúncio ficará visível imediatamente!',
+  'editar_anuncio': 'Para editar um anúncio, vá ao seu Perfil e clique em "Os meus anúncios". Encontre o anúncio que deseja editar e clique no botão "Editar". Pode alterar título, descrição, preço, imagens e outros detalhes. Não se esqueça de guardar as alterações!',
+  'eliminar': 'Para eliminar um anúncio, vá ao seu Perfil, aceda a "Os meus anúncios". Encontre o anúncio e clique no botão "Apagar". Confirme a eliminação. Atenção: esta ação é irreversível!',
+  'imagens': 'Ao criar ou editar um anúncio, arraste imagens para a zona de upload ou clique para selecionar do seu dispositivo. Aceitamos JPG, PNG e GIF até 5MB cada. Pode adicionar até 5 imagens, sendo a primeira a imagem principal.',
+  'estado': 'Ao publicar, selecione o estado do artigo: "Novo" (nunca usado), "Usado - Bom" (pouco desgaste) ou "Usado - Regular" (uso visível). Um estado correto ajuda compradores a saber o que esperar!',
+  'preco': 'Ao criar o anúncio, defina o preço em euros. Se preferir troca, selecione "Troca" em vez de "Venda" e indique o que aceita em troca na descrição.',
+  
+  // Mensagens
+  'mensagens': 'Para ver as suas mensagens, faça login e clique em "Mensagens" no menu. Ali encontra todas as suas conversas com outros utilizadores, agrupadas por anúncio.',
+  'contactar': 'Para contactar um vendedor, visite o anúncio que lhe interessa e clique no botão "Enviar Mensagem" verde. Escreva a sua mensagem e envie! O vendedor receberá a sua mensagem.',
+  'responder': 'Para responder a uma mensagem, vá a "Mensagens", clique na conversa e escreva a sua resposta na caixa de texto. Clique em "Enviar" para mandar a mensagem.',
+  
+  // Conta
+  'recuperar': 'Se esqueceu a password, vá à página de Login e clique em "Esqueceu-se?". Introduza o seu email e receberá um link para criar uma nova password. O link é válido por 24 horas.',
+  'editar': 'Para editar o seu perfil, faça login e clique no seu nome no menu superior, depois em "Perfil". Pode alterar o seu nome, telefone, foto de perfil e outras informações.',
+  'registar': 'Para criar uma conta, clique em "Registar" no menu. Preencha o formulário com o seu nome, email, telefone e password. Após o registo, receberá um email de confirmação.',
+  'eliminar_conta': 'Para eliminar a sua conta, contacte-nos pelo email suporte@trocas.pt. A nossa equipe processará o pedido num prazo de 48 horas.',
+  'login': 'Para fazer login, clique em "Login" no menu. Introduza o seu email e password e clique em "Entrar". Se esqueceu a password, use a opção de recuperação.',
+  
+  // Favoritos
+  'favoritos': 'Para guardar favoritos, basta clicar no ícone de coração (❤️) num anúncio que goste. O anúncio será guardado na sua lista de favoritos.',
+  'ver_favoritos': 'Os seus favoritos encontram-se no seu Perfil. Clique no seu nome no menu e depois em "Favoritos" para ver todos os anúncios guardados.',
+  
+  // Pesquisar
+  'pesquisar': 'Para pesquisar anúncios, use a barra de pesquisa no topo do site. Introduza palavras-chave (ex: "iPhone", "Móveis") e prima Enter. Pode também filtrar por categoria, tipo e localização.',
+  'categoria': 'Para filtrar por categoria, clique numa categoria no menu (ex: Eletrónica, Veículos) ou use a pesquisa avançada. Cada categoria tem anúncios específicos.',
+  'localizacao': 'Para filtrar por localização, use a opção de pesquisa avançada. Pode introduzir a sua cidade ou região para encontrar anúncios perto de si.',
+  
+  // Denúncias
+  'denunciar': 'Se encontrar um anúncio inappropriate, clique no botão "Denunciar" na página do anúncio. Selecione o motivo e descreva o problema. A nossa equipa analisará a denúncia.',
+  
+  // Regras
+  'regras': 'As regras do site incluem: sem anúncios ilegais, sem produtos Proibidos, sem spam, sem conteúdos ofensivos. Respeite os outros utilizadores e mantenha uma comunicação educada. Anúncios que infrinjam as regras serão removidos.'
+};
+
+/* Keywords mapping - Mapeamento de palavras-chave para respostas automáticas */
+const keywordAnswers = {
+  // Anúncios
+  'publicar': faqAnswers['publicar'],
+  'anúncio': faqAnswers['publicar'],
+  'anuncio': faqAnswers['publicar'],
+  'criar': faqAnswers['publicar'],
+  'colocar': faqAnswers['publicar'],
+  'vender': faqAnswers['publicar'],
+  
+  'editar': faqAnswers['editar_anuncio'],
+  'alterar': faqAnswers['editar_anuncio'],
+  'modificar': faqAnswers['editar_anuncio'],
+  
+  'eliminar': faqAnswers['eliminar'],
+  'apagar': faqAnswers['eliminar'],
+  'remover': faqAnswers['eliminar'],
+  'delete': faqAnswers['eliminar'],
+  
+  'imagem': faqAnswers['imagens'],
+  'imagens': faqAnswers['imagens'],
+  'foto': faqAnswers['imagens'],
+  'fotos': faqAnswers['imagens'],
+  'upload': faqAnswers['imagens'],
+  ' photograph': faqAnswers['imagens'],
+  
+  'estado': faqAnswers['estado'],
+  'condição': faqAnswers['estado'],
+  'condicao': faqAnswers['estado'],
+  'novo': faqAnswers['estado'],
+  'usado': faqAnswers['estado'],
+  
+  'preço': faqAnswers['preco'],
+  'preco': faqAnswers['preco'],
+  'valor': faqAnswers['preco'],
+  'troca': faqAnswers['preco'],
+  'barato': faqAnswers['preco'],
+  
+  // Mensagens
+  'mensagem': faqAnswers['mensagens'],
+  'mensagens': faqAnswers['mensagens'],
+  'chat': faqAnswers['mensagens'],
+  'conversa': faqAnswers['mensagens'],
+  'caixa': faqAnswers['mensagens'],
+  
+  'contactar': faqAnswers['contactar'],
+  'vendedor': faqAnswers['contactar'],
+  'falar': faqAnswers['contactar'],
+  'enviar': faqAnswers['contactar'],
+  
+  'responder': faqAnswers['responder'],
+  'resposta': faqAnswers['responder'],
+  'reply': faqAnswers['responder'],
+  
+  // Conta
+  'password': faqAnswers['recuperar'],
+  'pass': faqAnswers['recuperar'],
+  'recuperar': faqAnswers['recuperar'],
+  'es queci': faqAnswers['recuperar'],
+  'esqueci': faqAnswers['recuperar'],
+  'recuperação': faqAnswers['recuperar'],
+  
+  'perfil': faqAnswers['editar'],
+  'dados': faqAnswers['editar'],
+  'nome': faqAnswers['editar'],
+  'telefone': faqAnswers['editar'],
+  
+  'registar': faqAnswers['registar'],
+  'registro': faqAnswers['registar'],
+  'criar conta': faqAnswers['registar'],
+  'sign up': faqAnswers['registar'],
+  'conta': faqAnswers['registar'],
+  
+  'eliminar conta': faqAnswers['eliminar_conta'],
+  'apagar conta': faqAnswers['eliminar_conta'],
+  'encerrar': faqAnswers['eliminar_conta'],
+  
+  'login': faqAnswers['login'],
+  'entrar': faqAnswers['login'],
+  'sign in': faqAnswers['login'],
+  'logar': faqAnswers['login'],
+  
+  // Favoritos
+  'favorito': faqAnswers['favoritos'],
+  'favoritos': faqAnswers['favoritos'],
+  'heart': faqAnswers['favoritos'],
+  'guardar': faqAnswers['favoritos'],
+  'salvar': faqAnswers['favoritos'],
+  
+  // Pesquisar
+  'pesquisar': faqAnswers['pesquisar'],
+  'buscar': faqAnswers['pesquisar'],
+  'procurar': faqAnswers['pesquisar'],
+  'search': faqAnswers['pesquisar'],
+  
+  'categoria': faqAnswers['categoria'],
+  'categorias': faqAnswers['categoria'],
+  'filtro': faqAnswers['categoria'],
+  
+  'localização': faqAnswers['localizacao'],
+  'localizacao': faqAnswers['localizacao'],
+  'cidade': faqAnswers['localizacao'],
+  'região': faqAnswers['localizacao'],
+  'perto': faqAnswers['localizacao'],
+  
+  // Denúncias
+  'denunciar': faqAnswers['denunciar'],
+  'denúncia': faqAnswers['denunciar'],
+  'report': faqAnswers['denunciar'],
+  'reportar': faqAnswers['denunciar'],
+  'spam': faqAnswers['denunciar'],
+  
+  // Regras
+  'regras': faqAnswers['regras'],
+  'regra': faqAnswers['regras'],
+  'normas': faqAnswers['regras'],
+  'termos': faqAnswers['regras'],
+  'condições': faqAnswers['regras']
+};
+
+/* Função para enviar mensagem */
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const message = input.value.trim();
+  if (message) {
+    addMessage(message, 'sent', 'Você');
+    input.value = '';
+    setTimeout(() => {
+      const response = getResponse(message);
+      addMessage(response, 'received', 'Assistente');
+    }, 500);
+  }
+}
+
+/* Função para fazer pergunta predefinida */
+function askQuestion(key) {
+  const btn = document.querySelector(`.faq-item[onclick="askQuestion('${key}')"]`);
+  const questionText = btn ? btn.querySelector('span').textContent : key;
+  const answer = faqAnswers[key] || 'Pergunta não encontrada.';
+  
+  addMessage(questionText, 'sent', 'Você');
+  setTimeout(() => addMessage(answer, 'received', 'Assistente'), 300);
+}
+
+/* Função para adicionar mensagem ao chat */
+function addMessage(text, type, sender) {
+  const chat = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `message ${type}`;
+  const time = new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+  div.innerHTML = `
+    <div class="message-bubble">${text}</div>
+    <div class="message-time">${sender} • ${time}</div>
+  `;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* Função para obter resposta baseada em palavras-chave */
+function getResponse(message) {
+  const lower = message.toLowerCase();
+  let response = 'Desculpe, não entendi a sua pergunta. Pode tentar uma das perguntas frequentes acima ou contacte-nos pelo email suporte@trocas.pt.';
+  
+  // Primeiro verificar correspondências exatas em faqAnswers
+  for (let key in faqAnswers) {
+    if (lower.includes(key)) {
+      response = faqAnswers[key];
+      break;
+    }
+  }
+  
+  // Depois verificar palavras-chave
+  if (response.startsWith('Desculpe')) {
+    for (let key in keywordAnswers) {
+      if (lower.includes(key)) {
+        response = keywordAnswers[key];
+        break;
+      }
+    }
+  }
+  
+  return response;
+}
+
+/* Enter key to send */
+document.getElementById('chatInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') sendMessage();
+});
+</script>
+
+{% include 'partials/footer.html' %}

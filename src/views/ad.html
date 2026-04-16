@@ -1,0 +1,281 @@
+{% include 'partials/header.html' %}
+
+<!-- Main Content - Página de Detalhes do Anúncio -->
+<main class="main">
+  <div class="container">
+    <div class="ad-layout">
+      <!-- Main Content Area - Área Principal -->
+      <div class="ad-main-content">
+        <!-- Gallery - Galeria de Imagens -->
+        <div class="ad-card ad-gallery-card">
+          <div class="ad-gallery">
+            {% if imagens %}
+              <div class="ad-main-image-container">
+                <img src="{{ url_for('static', filename='images/uploads/' + imagens[0].arquivo) }}" alt="{{ anuncio.titulo }}" class="ad-main-image" id="mainImage">
+              </div>
+              <div class="ad-thumbnails">
+                {% for img in imagens %}
+                  <div class="ad-thumbnail-wrapper {% if loop.index0 == 0 %}active{% endif %}" onclick="updateMainImage(this, '{{ url_for('static', filename='images/uploads/' + img.arquivo) }}')">
+                    <img src="{{ url_for('static', filename='images/uploads/' + img.arquivo) }}" alt="Imagem {{ loop.index }}">
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="ad-no-image-large">
+                <i class="fas fa-image"></i>
+                <span>Sem imagens disponíveis</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Description Card - Card de Descrição -->
+        <div class="card mt-4">
+          <div class="card-body">
+            <h2 class="card-title mb-4">Descrição</h2>
+            <div class="ad-description-text">
+              {{ anuncio.descricao }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Area - Barra Lateral -->
+      <aside class="ad-sidebar">
+        <!-- Info Card -->
+        <div class="card ad-info-card">
+          <div class="card-body">
+            <!-- Categoria -->
+            <div class="ad-category-tag mb-2">
+              <a href="{{ url_for('view_category', slug=anuncio.categoria_slug) }}">
+                <i class="fas {{ anuncio.categoria_icone if anuncio.categoria_icone else 'fa-folder' }}"></i> {{ anuncio.categoria_nome }}
+              </a>
+            </div>
+            
+            <!-- Título -->
+            <h1 class="ad-title-large">{{ anuncio.titulo }}</h1>
+            
+            <!-- Preço -->
+            <div class="ad-price-tag {% if anuncio.tipo == 'troca' %}troca{% endif %}">
+              {% if anuncio.tipo == 'venda' %}
+                {% if anuncio.preco and anuncio.preco|float > 0 %}
+                  {{ "%.2f"|format(anuncio.preco|float) }} €
+                {% else %}
+                  Grátis
+                {% endif %}
+              {% else %}
+                <i class="fas fa-exchange-alt"></i> Troca
+              {% endif %}
+            </div>
+
+            <!-- Meta informações -->
+            <div class="ad-meta-list">
+              <div class="ad-meta-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ anuncio.localizacao if anuncio.localizacao else 'Portugal' }}</span>
+              </div>
+              <div class="ad-meta-item">
+                <i class="fas fa-eye"></i>
+                <span>{{ anuncio.views }} visualizações</span>
+              </div>
+              <div class="ad-meta-item">
+                <i class="far fa-clock"></i>
+                <span>Desde {{ anuncio.created_at.strftime('%d/%m/%Y') }}</span>
+              </div>
+            </div>
+
+            <!-- Ações do anúncio -->
+            <div class="ad-actions mt-4">
+              {% if current_user.is_authenticated and current_user.id != anuncio.utilizador_id %}
+                <button class="btn btn-primary btn-block btn-lg" onclick="openContactModal()">
+                  <i class="fas fa-envelope"></i> Enviar Mensagem
+                </button>
+              {% elif not current_user.is_authenticated %}
+                <a href="{{ url_for('login', next='/anuncio/' + anuncio.id|string) }}" class="btn btn-primary btn-block btn-lg">
+                  <i class="fas fa-sign-in-alt"></i> Entrar para Contactar
+                </a>
+              {% else %}
+                <div class="seller-own-ad">
+                  <p class="text-secondary text-center small mb-3">Este é o seu anúncio</p>
+                  <div class="d-flex gap-2">
+                    <a href="{{ url_for('edit_ad', id=anuncio.id) }}" class="btn btn-outline btn-block">
+                      <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <form action="{{ url_for('delete_ad', id=anuncio.id) }}" method="POST" class="flex-1" onsubmit="return confirm('Tem a certeza?');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn btn-danger btn-block">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Seller Profile Card - Card do Vendedor -->
+        <div class="card mt-4 seller-card">
+          <div class="card-body">
+            <h3 class="card-title small-caps mb-3">Vendedor</h3>
+            <div class="seller-profile">
+              <div class="user-avatar large">
+                {{ anuncio.utilizador_nome[0]|upper }}
+              </div>
+              <div class="seller-details">
+                <span class="seller-name">{{ anuncio.utilizador_nome }}</span>
+                {% if anuncio.utilizador_telefone %}
+                  <span class="seller-phone"><i class="fas fa-phone"></i> {{ anuncio.utilizador_telefone }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Related Ads Section - Anúncios Relacionados -->
+    {% if relacionados %}
+      <section class="section mt-5">
+        <div class="section-header">
+          <h2 class="section-title">Anúncios Relacionados</h2>
+        </div>
+        <div class="ads-grid">
+          {% for ad in relacionados %}
+            <a href="{{ url_for('view_ad', id=ad.id) }}" class="ad-card">
+              <div class="ad-img">
+                {% if ad.primeira_imagem %}
+                  <img src="{{ url_for('static', filename='images/uploads/' + ad.primeira_imagem) }}" alt="{{ ad.titulo }}">
+                {% else %}
+                  <div class="ad-no-img">
+                    <i class="fas fa-image"></i>
+                  </div>
+                {% endif %}
+                <span class="ad-badge {{ ad.tipo }}">{{ 'Venda' if ad.tipo == 'venda' else 'Troca' }}</span>
+              </div>
+              <div class="ad-info">
+                <h3 class="ad-title">{{ ad.titulo }}</h3>
+                <div class="ad-price {% if ad.tipo == 'troca' %}troca{% endif %}">
+                  {% if ad.tipo == 'venda' %}
+                    {% if ad.preco and ad.preco|float > 0 %}
+                      {{ "%.2f"|format(ad.preco|float) }} €
+                    {% else %}
+                      Grátis
+                    {% endif %}
+                  {% else %}
+                    <i class="fas fa-exchange-alt"></i> Troca
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </div>
+</main>
+
+<!-- Contact Modal - Modal de Contacto -->
+{% if current_user.is_authenticated and current_user.id != anuncio.utilizador_id %}
+<div class="modal" id="contactModal">
+  <div class="modal-overlay" onclick="closeModal('contactModal')"></div>
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 class="modal-title">Contactar Vendedor</h3>
+      <button class="modal-close" onclick="closeModal('contactModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form action="{{ url_for('start_conversation', id=anuncio.id) }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label class="form-label">A sua mensagem</label>
+          <textarea name="mensagem" class="form-control" rows="5" placeholder="Olá, estou interessado(a)..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          <i class="fas fa-paper-plane"></i> Enviar Agora
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Report Modal - Modal de Denúncia -->
+{% if current_user.is_authenticated and current_user.id != anuncio.utilizador_id %}
+<div class="modal" id="reportModal">
+  <div class="modal-overlay" onclick="closeModal('reportModal')"></div>
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 class="modal-title">Denunciar Anúncio</h3>
+      <button class="modal-close" onclick="closeModal('reportModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form action="{{ url_for('report_ad', id=anuncio.id) }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label class="form-label">Motivo</label>
+          <select name="motivo" class="form-control" required>
+            <option value="">Selecione um motivo</option>
+            <option value="spam">Spam ou publicidade</option>
+            <option value="proibido">Produto proibido ou ilegal</option>
+            <option value="falso">Anúncio falso ou enganoso</option>
+            <option value="inapropriado">Conteúdo inapropriado</option>
+            <option value="outro">Outro motivo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descrição (opcional)</label>
+          <textarea name="descricao" class="form-control" rows="3" placeholder="Forneça mais detalhes..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger btn-block btn-lg">
+          <i class="fas fa-flag"></i> Denunciar
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- JavaScript para interactividade da página -->
+<script>
+// Actualizar imagem principal ao clicar em miniatura
+function updateMainImage(thumb, src) {
+  document.getElementById('mainImage').src = src;
+  document.querySelectorAll('.ad-thumbnail-wrapper').forEach(t => t.classList.remove('active'));
+  thumb.classList.add('active');
+}
+
+// Abrir modal de contacto
+function openContactModal() {
+  document.getElementById('contactModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+// Abrir modal de denúncia
+function openReportModal() {
+  document.getElementById('reportModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+// Fechar modal
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+  document.body.style.overflow = 'auto';
+}
+
+// Alternar favorito
+function toggleFavorite(id) {
+  fetch('/anuncio/' + id + '/favorito', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    }
+  });
+}
+</script>
+
+{% include 'partials/footer.html' %}

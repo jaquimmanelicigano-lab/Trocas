@@ -1,0 +1,109 @@
+{% include 'partials/header.html' %}
+
+<!-- Main Content - Conteúdo Principal da Página Inicial -->
+<main class="main">
+  <div class="container">
+    
+    <!-- Hero Section - Seção Principal de Destaque -->
+    <section class="hero">
+      <h1 class="hero-title">Encontre o que procura no Trocas</h1>
+      <p class="hero-subtitle">Compre, venda ou troque produtos de forma simples e segura</p>
+      <div class="hero-actions">
+        <a href="{{ url_for('search') }}" class="btn btn-hero">Ver Todos os Anúncios</a>
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('create_ad') }}" class="btn btn-hero-outline">Anunciar Agora</a>
+        {% else %}
+          <a href="{{ url_for('register') }}" class="btn btn-hero-outline">Anunciar Agora</a>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- Categories - Seção de Categorias -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Explore por Categorias</h2>
+      </div>
+      <div class="cat-grid">
+        {% if categorias %}
+          {% for cat in categorias %}
+            <a href="{{ url_for('view_category', slug=cat.slug) }}" class="cat-card">
+              <div class="cat-icon">
+                <i class="fas {{ cat.icone if cat.icone else 'fa-folder' }}"></i>
+              </div>
+              <span class="cat-name text-center">{{ cat.nome }}</span>
+            </a>
+          {% endfor %}
+        {% else %}
+          <p class="text-secondary">Em breve mais categorias...</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- Recent Ads - Anúncios Recentes -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Anúncios Recentes</h2>
+        <a href="{{ url_for('search') }}" class="btn btn-sm btn-outline">Ver Todos</a>
+      </div>
+      
+      {% if anuncios %}
+        <div class="ads-grid">
+          {% for ad in anuncios %}
+            <a href="{{ url_for('view_ad', id=ad.id) }}" class="ad-card">
+              <div class="ad-img">
+                {% if ad.primeira_imagem %}
+                  <img src="{{ url_for('static', filename='images/uploads/' + ad.primeira_imagem) }}" alt="{{ ad.titulo }}" loading="lazy">
+                {% else %}
+                  <div class="ad-no-img">
+                    <i class="fas fa-image"></i>
+                  </div>
+                {% endif %}
+                <span class="ad-badge {{ ad.tipo }}">{{ 'Venda' if ad.tipo == 'venda' else 'Troca' }}</span>
+              </div>
+              <div class="ad-info">
+                <h3 class="ad-title">{{ ad.titulo }}</h3>
+                <div class="ad-price {% if ad.tipo == 'troca' %}troca{% endif %}">
+                  {% if ad.tipo == 'venda' %}
+                    {% if ad.preco and ad.preco|float > 0 %}
+                      {{ "%.2f"|format(ad.preco|float) }} €
+                    {% else %}
+                      Grátis
+                    {% endif %}
+                  {% else %}
+                    <i class="fas fa-exchange-alt"></i> Troca
+                  {% endif %}
+                </div>
+                <div class="ad-meta">
+                  <span><i class="fas fa-map-marker-alt"></i> {{ ad.localizacao if ad.localizacao else 'Portugal' }}</span>
+                  <span><i class="far fa-clock"></i> {{ ad.created_at.strftime('%d %b') }}</span>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="fas fa-box-open"></i></div>
+          <h3>Nenhum anúncio disponível</h3>
+          <p>Seja o primeiro a publicar um anúncio!</p>
+          <a href="{{ url_for('create_ad') }}" class="btn btn-primary mt-2">Criar Anúncio</a>
+        </div>
+      {% endif %}
+    </section>
+
+    <!-- CTA Section - Chamada para Ação -->
+    <section class="section cta-banner">
+      <div class="cta-content">
+        <h2>Tem algo para vender ou trocar?</h2>
+        <p>Publique o seu anúncio em segundos e alcance milhares de pessoas interessadas.</p>
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('create_ad') }}" class="btn btn-primary btn-lg"><i class="fas fa-plus"></i> Criar Anúncio Grátis</a>
+        {% else %}
+          <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg"><i class="fas fa-plus"></i> Criar Anúncio Grátis</a>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+</main>
+
+{% include 'partials/footer.html' %}

@@ -1,0 +1,111 @@
+{% include 'partials/header.html' %}
+
+<!-- Main Content - Página de Pesquisa -->
+<main class="main">
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb mb-3">
+      <a href="{{ url_for('home') }}">Início</a>
+      <i class="fas fa-chevron-right separator"></i>
+      <span>Pesquisa</span>
+    </nav>
+
+    <!-- Filters - Filtros de Pesquisa -->
+    <form action="{{ url_for('search') }}" method="GET" class="filters">
+      <div class="filters-grid">
+        <div class="flex-1">
+          <label class="form-label">Palavra-chave</label>
+          <input type="text" name="q" class="form-control" placeholder="O que procura?" value="{{ query if query else '' }}">
+        </div>
+        <div>
+          <label class="form-label">Categoria</label>
+          <select name="categoria" class="filter-select">
+            <option value="">Todas as Categorias</option>
+            {% for cat in categorias %}
+              <option value="{{ cat.slug }}" {% if selected_categoria == cat.id %}selected{% endif %}>{{ cat.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Tipo de Negócio</label>
+          <select name="tipo" class="filter-select">
+            <option value="">Qualquer tipo</option>
+            <option value="venda" {% if selected_tipo == 'venda' %}selected{% endif %}>Venda</option>
+            <option value="troca" {% if selected_tipo == 'troca' %}selected{% endif %}>Troca</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Localização</label>
+          <input type="text" name="localizacao" class="form-control" placeholder="Cidade ou região" value="{{ selected_localizacao if selected_localizacao else '' }}">
+        </div>
+        <div class="d-flex align-end">
+          <button type="submit" class="btn btn-primary btn-block" style="height: 48px;">
+            <i class="fas fa-search"></i> Pesquisar
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Results Header - Cabeçalho dos Resultados -->
+    <div class="section-header mb-4">
+      <h2 class="section-title">
+        {% if anuncios|length == 0 %}
+          Nenhum resultado encontrado
+        {% else %}
+          {{ anuncios|length }} resultado{{ '' if anuncios|length == 1 else 's' }} encontrado{{ '' if anuncios|length == 1 else 's' }}
+          {% if query %} para "{{ query }}"{% endif %}
+        {% endif %}
+      </h2>
+    </div>
+
+    <!-- Results - Resultados da Pesquisa -->
+    {% if anuncios %}
+      <div class="ads-grid">
+        {% for ad in anuncios %}
+          <a href="{{ url_for('view_ad', id=ad.id) }}" class="ad-card">
+            <div class="ad-img">
+              {% if ad.primeira_imagem %}
+                <img src="{{ url_for('static', filename='images/uploads/' + ad.primeira_imagem) }}" alt="{{ ad.titulo }}" loading="lazy">
+              {% else %}
+                <div class="ad-no-img">
+                  <i class="fas fa-image"></i>
+                </div>
+              {% endif %}
+              <span class="ad-badge {{ ad.tipo }}">{{ 'Venda' if ad.tipo == 'venda' else 'Troca' }}</span>
+            </div>
+            <div class="ad-info">
+              <h3 class="ad-title">{{ ad.titulo }}</h3>
+              <div class="ad-price {% if ad.tipo == 'troca' %}troca{% endif %}">
+                {% if ad.tipo == 'venda' %}
+                  {% if ad.preco and ad.preco|float > 0 %}
+                    {{ "%.2f"|format(ad.preco|float) }} €
+                  {% else %}
+                    Grátis
+                  {% endif %}
+                {% else %}
+                  <i class="fas fa-exchange-alt"></i> Troca
+                {% endif %}
+              </div>
+              <div class="ad-meta">
+                <span><i class="fas fa-map-marker-alt"></i> {{ ad.localizacao if ad.localizacao else 'Portugal' }}</span>
+                <span><i class="far fa-clock"></i> {{ ad.created_at.strftime('%d %b') }}</span>
+              </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-search"></i></div>
+        <h3>Nenhum resultado disponível</h3>
+        <p>Não encontramos nenhum anúncio com os filtros selecionados.</p>
+        <div class="mt-2">
+          <a href="{{ url_for('search') }}" class="btn btn-outline">Limpar Filtros</a>
+          <a href="{{ url_for('create_ad') }}" class="btn btn-primary ml-1">Criar o Meu Anúncio</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</main>
+
+{% include 'partials/footer.html' %}
