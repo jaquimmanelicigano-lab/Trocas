@@ -1,14 +1,14 @@
 @echo off
 cd /d "C:\Users\clash\Desktop\trocas"
 
-echo A adicionar ficheiros...
+echo 1. A adicionar ficheiros...
 git add .
 
-echo A fazer commit...
-git commit -m "Fix deploy"
+echo 2. A fazer commit...
+git commit -m "Updates"
 
-echo A fazer push para GitHub...
+echo 3. A fazer push para GitHub...
 git push -f https://github.com/jaquimmanelicigano-lab/Trocas.git master
 
-echo Concluido!
+echo 4. Concluido! Vai ao Render e faz Manual Deploy.
 pause
