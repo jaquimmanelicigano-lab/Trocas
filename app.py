@@ -41,8 +41,10 @@ app.config.from_object(config[os.getenv('FLASK_ENV', 'default')])
 # Inicializar extensões do Flask
 # db - ORM para banco de dados
 db.init_app(app)
+from utils.db_seeder import seed_db
 with app.app_context():
     db.create_all()
+    seed_db() # Popular base de dados se estiver vazia
 # csrf - proteção contra ataques CSRF
 csrf = CSRFProtect(app)
 # login_manager - gerenciador de autenticação
