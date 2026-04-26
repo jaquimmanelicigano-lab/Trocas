@@ -1,85 +1,83 @@
-<!DOCTYPE html>
-<html lang="pt-PT">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Utilizadores - Admin</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body style="display: block;">
-  <%- include('../partials/header') %>
+{% include 'partials/header.html' %}
 
-  <main class="main">
-    <div class="container">
-      <div class="d-flex justify-between align-center mb-2">
-        <h1>Utilizadores</h1>
-      </div>
-
-      <!-- Search -->
-      <form action="/admin/utilizadores" method="GET" class="filters">
-        <div style="display: flex; gap: 10px;">
-          <input type="text" name="search" class="form-control" placeholder="Pesquisar..." value="<%= search || '' %>">
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-search"></i>
-          </button>
+<main class="main">
+  <div class="container">
+    <!-- Flash Messages -->
+    {% with errors = get_flashed_messages(category_filter=['error']) %}
+      {% if errors %}
+        <div class="alert alert-error mb-4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {% for err in errors %}
+              <span><i class="fas fa-exclamation-circle"></i> {{ err }}</span>
+            {% endfor %}
+          </div>
         </div>
-      </form>
-
-      <!-- Table -->
-      <table class="table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Telefone</th>
-            <th>Tipo</th>
-            <th>Status</th>
-            <th>Data</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% users.forEach(function(u) { %>
-            <tr>
-              <td><%= u.id %></td>
-              <td><%= u.nome %></td>
-              <td><%= u.email %></td>
-              <td><%= u.telefone || '-' %></td>
-              <td>
-                <span class="badge badge-<%= u.tipo === 'admin' ? 'info' : 'success' %>"><%= u.tipo %></span>
-              </td>
-              <td>
-                <span class="badge badge-<%= u.ativo ? 'success' : 'danger' %>"><%= u.ativo ? 'Ativo' : 'Inativo' %></span>
-              </td>
-              <td><%= new Date(u.created_at).toLocaleDateString('pt-PT') %></td>
-              <td>
-                <a href="/admin/utilizadores/<%= u.id %>/editar" class="btn btn-sm btn-outline">
-                  <i class="fas fa-edit"></i>
-                </a>
-                <form action="/admin/utilizadores/<%= u.id %>/apagar" method="POST" style="display: inline;" onsubmit="return confirm('Eliminar este utilizador?');">
-                  <button type="submit" class="btn btn-sm btn-danger">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </form>
-              </td>
-            </tr>
-          <% }); %>
-        </tbody>
-      </table>
-
-      <!-- Pagination -->
-      <% if (pagination.totalPages > 1) { %>
-        <div class="pagination">
-          <% for(var i = 1; i <= pagination.totalPages; i++) { %>
-            <a href="?page=<%= i %><%= search ? '&search=' + search : '' %>" class="<%= pagination.page === i ? 'active' : '' %>"><%= i %></a>
-          <% } %>
+      {% endif %}
+    {% endwith %}
+    {% with success = get_flashed_messages(category_filter=['success']) %}
+      {% if success %}
+        <div class="alert alert-success mb-4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {% for msg in success %}
+              <span><i class="fas fa-check-circle"></i> {{ msg }}</span>
+            {% endfor %}
+          </div>
         </div>
-      <% } %>
+      {% endif %}
+    {% endwith %}
+
+    <div class="d-flex justify-between align-center mb-2">
+      <h1>Utilizadores</h1>
     </div>
-  </main>
 
-  <%- include('../partials/footer') %>
-</body>
-</html>
+    <!-- Search -->
+    <form action="{{ url_for('admin_users') }}" method="GET" class="filters">
+      <div style="display: flex; gap: 10px;">
+        <input type="text" name="search" class="form-control" placeholder="Pesquisar..." value="{{ search or '' }}">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </form>
+
+    <!-- Table -->
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Telefone</th>
+          <th>Tipo</th>
+          <th>Status</th>
+          <th>Data</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.nome }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.telefone or '-' }}</td>
+            <td>
+              <span class="badge badge-{{ 'info' if u.tipo == 'admin' else 'success' }}">{{ u.tipo }}</span>
+            </td>
+            <td>
+              <span class="badge badge-{{ 'success' if u.ativo else 'danger' }}">{{ 'Ativo' if u.ativo else 'Inativo' }}</span>
+            </td>
+            <td>{{ u.created_at.strftime('%d/%m/%Y') if u.created_at else '-' }}</td>
+            <td>
+              <a href="{{ url_for('admin_edit_user', id=u.id) }}" class="btn btn-sm btn-outline">
+                <i class="fas fa-edit"></i>
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</main>
+
+{% include 'partials/footer.html' %}

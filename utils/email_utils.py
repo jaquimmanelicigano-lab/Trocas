@@ -68,62 +68,6 @@ def send_email(to_email, subject, html_content, text_content=None):
         return False
 
 
-def send_welcome_email(utilizador):
-    """
-    Envia email de boas-vindas ao utilizador recém-registado
-    
-    Args:
-        utilizador: Objeto do modelo Utilizador
-    """
-    subject = "Bem-vindo ao Trocas.pt - Conta criada com sucesso!"
-    
-    html_content = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 30px; border-radius: 10px; text-align: center;">
-            <h1 style="color: white; margin: 0;">Bem-vindo ao Trocas.pt!</h1>
-        </div>
-        <div style="padding: 30px; background: #f8fafc; border-radius: 0 0 10px 10px;">
-            <p>Olá <strong>{utilizador.nome}</strong>,</p>
-            <p>Obrigado por se registrar no Trocas.pt! A sua conta foi criada com sucesso.</p>
-            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e2e8f0;">
-                <p style="margin: 0;"><strong>Email:</strong> {utilizador.email}</p>
-                <p style="margin: 10px 0 0 0;"><strong>Telefone:</strong> {utilizador.telefone}</p>
-            </div>
-            <p>Agora pode:</p>
-            <ul>
-                <li>Publicar anúncios de venda ou troca</li>
-                <li>Explorar milhares de produtos</li>
-                <li>Contactar outros utilizadores</li>
-            </ul>
-            <a href="http://localhost:3000/" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 10px;">Explorar Anúncios</a>
-            <p style="margin-top: 30px; color: #64748b; font-size: 14px;">
-                Se tiver alguma dúvida, não hesite em contactar-nos.<br>
-                Equipa Trocas.pt
-            </p>
-        </div>
-    </body>
-    </html>
-    """
-    
-    text_content = f"""
-    Bem-vindo ao Trocas.pt!
-    
-    Olá {utilizador.nome},
-    
-    Obrigado por se registrar no Trocas.pt! A sua conta foi criada com sucesso.
-    
-    Email: {utilizador.email}
-    Telefone: {utilizador.telefone}
-    
-    Agora pode publicar anúncios e explorar produtos!
-    
-    Equipa Trocas.pt
-    """
-    
-    return send_email(utilizador.email, subject, html_content, text_content)
-
-
 def send_password_reset_email(utilizador, token):
     """
     Envia email com link para recuperação de password

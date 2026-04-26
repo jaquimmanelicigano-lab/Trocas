@@ -1,0 +1,82 @@
+{% block title %}Sobre Nós - Trocas{% endblock %}
+
+{% include 'partials/header.html' %}
+
+<main class="main">
+  <div class="container">
+    <!-- Sobre Nós Content -->
+    <section>
+      <h1>Sobre a Trocas</h1>
+
+      <section>
+        <h2>Quem Somos</h2>
+        <p>A Trocas é uma plataforma portuguesa dedicada à compra, venda e troca de produtos novos e usados. Fundada em 2024, a nossa missão é criar uma comunidade segura e confiável onde as pessoas possam dar nova vida aos objetos que já não utilizam, promovendo assim a economia circular e a sustentabilidade em Portugal.</p>
+        <p>Acreditamos que cada objeto tem uma história para contar e que, ao trocarmos ou revendermos itens, estamos não só a economizar dinheiro, mas também a reduzir o desperdício e o impacto ambiental.</p>
+      </section>
+
+      <section>
+        <h2>Nossa Missão</h2>
+        <p>Facilitar a troca sustentária de bens entre particulares em todo o território português, promovendo:</p>
+        <ul>
+          <li>A redução do desperdício e da pegada ecológica;</li>
+          <li>O acesso económico a bens de qualidade;</li>
+          <li>A construção de comunidades locais mais fortes e conectadas;</li>
+          <li>A inovação no mercado de segunda mão em Portugal.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Como Funciona</h2>
+        <p>Na Trocas, o processo é simples e totalmente gratuito:</p>
+        <ol>
+          <li><strong>Registe-se</strong> - Crie a sua conta em poucos minutos;</li>
+          <li><strong>Publique</strong> - Anuncie os produtos que deseja vender, trocar ou doar;</li>
+          <li><strong>Descubra</strong> - Explore milhares de anúncios de utilizadores de todo o país;</li>
+          <li><strong>Conecte-se</strong> - Contacte directamente com compradores, vendedores ou parceiros de troca;</li>
+          <li><strong>Troque ou Venda</strong> - Combine os detalhes da transação de forma segura e conveniente.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Nossos Valores</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+          <div class="value-card">
+            <h3>Confiança</h3>
+            <p>Construímos um ambiente seguro onde os utilizadores podem transacionar com confiança, graças aos nossos sistemas de verificação e avaliações.</p>
+          </div>
+          <div class="value-card">
+            <h3>Sustentabilidade</h3>
+            <p>Promovemos a reutilização de bens como forma de reduzir o desperdício e preservar os recursos naturais para as futuras gerações.</p>
+          </div>
+          <div class="value-card">
+            <h3>Comunidade</h3>
+            <p>Acreditamos no poder das conexões locais para criar redes de apoio e troca que beneficiam todos os membros da comunidade.</p>
+          </div>
+          <div class="value-card">
+            <h3>Inovação</h3>
+            <p>Estamos constantemente a melhorar a nossa plataforma com novas funcionalidades que tornam a experiência de troca ainda mais fácil e agradável.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Porque Escolher a Trocas?</h2>
+        <ul>
+          <li><strong>100% Gratuito</strong> - Não cobramos taxas por publicar anúncios ou por transações concluídas;</li>
+          <li><strong>Foco Local</strong> - Plataforma dedicada exclusivamente ao mercado português;</li>
+          <li><strong>Interface Simples</strong> - Design intuitivo que facilita a navegação mesmo para utilizadores menos experientes;</li>
+          <li><strong>Segurança</strong> - Sistemas de proteção contra fraudes e atividades suspeitas;</li>
+          <li><strong>Suporte Dedicado</strong> - Equipa pronta para ajudar em qualquer questão relacionada com a plataforma;</li>
+          <li><strong>Compromisso Ambiental</strong> - Cada troca na nossa plataforma contribui para um futuro mais sustentável.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Equipa Trocas</h2>
+        <p>Por detrás da Trocas está uma equipa apaixonada por tecnologia, sustentabilidade e serviço ao cliente. Trabalhamos diariamente para melhorar a experiência dos nossos utilizadores e expandir o impacto positivo da nossa plataforma em toda Portugal.</p>
+        <p>Se tiver alguma sugestão, parceria ou simplesmente quiser dizer olá, não hesite em <a href="{{ url_for('politica_privacidade') }}">contactar-nos</a>.</p>
+      </section>
+    </div>
+  </main>
+
+{% include 'partials/footer.html' %}

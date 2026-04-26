@@ -42,12 +42,12 @@ class Utilizador(db.Model, UserMixin):
     
     # Relacionamentos com outras tabelas
     # Um utilizador pode ter vários anúncios (relação um para muitos)
-    anuncios = db.relationship('Anuncio', backref='utilizador', lazy='dynamic', cascade='all, delete-orphan')
+    anuncios = db.relationship('Anuncio', backref='utilizador', lazy='select', cascade='all, delete-orphan')
     # Um utilizador pode ter vários favoritos
-    favoritos = db.relationship('Favorito', backref='utilizador', lazy='dynamic', cascade='all, delete-orphan')
-    # Mensagens enviadas pelo utilizador
+    favoritos = db.relationship('Favorito', backref='utilizador', lazy='select', cascade='all, delete-orphan')
+    # Mensagens enviadas pelo utilizador (lazy='dynamic' para poder filtrar)
     mensagens_enviadas = db.relationship('Mensagem', foreign_keys='Mensagem.utilizador_de', backref='remetente', lazy='dynamic')
-    # Mensagens recebidas pelo utilizador
+    # Mensagens recebidas pelo utilizador (lazy='dynamic' para poder filtrar)
     mensagens_recebidas = db.relationship('Mensagem', foreign_keys='Mensagem.utilizador_para', backref='destinatario', lazy='dynamic')
     
     # Sobrescrever método get_id para compatibilidade com Flask-Login
@@ -84,7 +84,7 @@ class Categoria(db.Model):
     
     # Relacionamentos
     # Anúncios pertencentes a esta categoria
-    anuncios = db.relationship('Anuncio', backref='categoria', lazy='dynamic')
+    anuncios = db.relationship('Anuncio', backref='categoria', lazy='select')
     # Subcategorias desta categoria
     subcategorias = db.relationship('Categoria', backref=db.backref('parent', remote_side='Categoria.id'))
     
@@ -108,10 +108,10 @@ class Anuncio(db.Model):
     # Tipo de anúncio: venda ou troca
     tipo = db.Column(db.Enum('venda', 'troca'), default='venda')
     # Estado do item: novo, usado em bom estado, ou usado regular
-    estado = db.Column(db.Enum('novo', 'usado_bueno', 'usado_regular'), default='novo')
-    # ID da categoria - chave estrangeira obrigatória
+    estado = db.Column(db.Enum('novo', 'usado_bom', 'usado_regular'), default='novo')
+#	ID da categoria - chave estrangeira obrigatória
     categoria_id = db.Column(db.Integer, db.ForeignKey('categorias.id'), nullable=False)
-    # ID do utilizador que criou o anúncio
+    #	ID do utilizador que criou o anúncio
     utilizador_id = db.Column(db.Integer, db.ForeignKey('utilizadores.id'), nullable=False)
     # Localização do item - opcional
     localizacao = db.Column(db.String(150))
@@ -121,6 +121,23 @@ class Anuncio(db.Model):
     status = db.Column(db.Enum('pendente', 'ativo', 'rejeitado', 'expirado'), default='pendente')
     # Motivo da rejeição (se aplicável)
     motivo_rejeicao = db.Column(db.Text)
+    
+    # ==================== DESTAQUE DO ANÚNCIO ====================
+    # Se o anúncio está destacado (pago)
+    destacado = db.Column(db.Boolean, default=False)
+    # Tipo de destaque: 'destaque' (básico) ou 'premium' (mais visível)
+    tipo_destaque = db.Column(db.Enum('destaque', 'premium'), nullable=True)
+    # Data de início do destaque
+    destaque_inicio = db.Column(db.DateTime, nullable=True)
+    # Data de fim do destaque (ex: 7 dias após pagamento)
+    destaque_fim = db.Column(db.DateTime, nullable=True)
+    # Valor pago pelo destaque
+    destaque_valor = db.Column(db.Numeric(10, 2), default=0)
+    # Método de pagamento: 'mbway', 'paypal', 'visa', 'mastercard'
+    metodo_pagamento = db.Column(db.String(50), nullable=True)
+    # Referência da transação (ID interno)
+    transacao_id = db.Column(db.String(100), nullable=True)
+    
     # Data de criação do anúncio
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     # Data de atualização do anúncio
@@ -149,6 +166,37 @@ class Anuncio(db.Model):
         if not img:
             img = self.imagens.first()
         return img
+    
+    # Propriedade para obter nome do utilizador
+    @property
+    def utilizador_nome(self):
+        return self.utilizador.nome if self.utilizador else ''
+    
+    # Propriedade para obter telefone do utilizador
+    @property
+    def utilizador_telefone(self):
+        return self.utilizador.telefone if self.utilizador else ''
+    
+    # Propriedade para obter primeira imagem
+    @property
+    def primeira_imagem(self):
+        img = self.imagem_principal
+        return img.arquivo if img else None
+    
+    # Propriedade para obter nome da categoria
+    @property
+    def categoria_nome(self):
+        return self.categoria.nome if self.categoria else ''
+    
+    # Propriedade para obter icone da categoria
+    @property
+    def categoria_icone(self):
+        return self.categoria.icone if self.categoria else ''
+    
+    # Propriedade para obter slug da categoria
+    @property
+    def categoria_slug(self):
+        return self.categoria.slug if self.categoria else ''
 
 
 # Modelo para imagens dos anúncios

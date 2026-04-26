@@ -1,7 +1,10 @@
 # Importar módulo os para operações de sistema de arquivos
 import os
+# Importar módulos para geração de IDs aleatórios
+import random
+import string
 # Importar classes do Flask para criar aplicação web
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, session, abort
 # Importar classes do Flask-Login para autenticação
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 # Importar Flask-WTF para formulários
@@ -9,7 +12,7 @@ from flask_wtf import FlaskForm
 # Importar proteção CSRF
 from flask_wtf.csrf import CSRFProtect
 # Importar campos de formulário do WTForms
-from wtforms import StringField, PasswordField, TextAreaField, SelectField, FileField, DecimalField
+from wtforms import StringField, PasswordField, TextAreaField, SelectField, FileField, DecimalField, BooleanField
 # Importar validadores de formulários
 from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional
 # Importar função para nome seguro de arquivos
@@ -23,25 +26,23 @@ from config import config
 # Importar modelos do banco de dados
 from models import db, Utilizador, Categoria, Anuncio, ImagemAnuncio, Favorito, Mensagem, Denuncia, LogAdmin
 # Importar utilities de email
-from utils.email_utils import send_welcome_email, send_password_reset_email, send_account_confirmation_with_token
+from utils.email_utils import send_password_reset_email, send_account_confirmation_with_token
 # Importar bcrypt para geração de tokens
 import bcrypt
 
 # Inicializar Flask - criar aplicação web
 # template_folder aponta para pasta de templates HTML
 # static_folder aponta para arquivos estáticos (CSS, JS, imagens)
-app = Flask(__name__, template_folder='src/views', static_folder='src/public')
+# static_url_path define a URL base para arquivos estáticos (padrão: /static)
+app = Flask(__name__, template_folder='src/views', static_folder='src/public', static_url_path='/static')
 # Carregar configurações baseadas no ambiente (desenvolvimento ou produção)
 app.config.from_object(config[os.getenv('FLASK_ENV', 'default')])
 
 # Inicializar extensões do Flask
 # db - ORM para banco de dados
 db.init_app(app)
-# Mostrar a URL para debug
-print(f"DEBUG: SQLALCHEMY_DATABASE_URI = {app.config.get('SQLALCHEMY_DATABASE_URI')}")
 with app.app_context():
     db.create_all()
-    print("DEBUG: Base de dados criada/verificada")
 # csrf - proteção contra ataques CSRF
 csrf = CSRFProtect(app)
 # login_manager - gerenciador de autenticação
@@ -66,20 +67,20 @@ class RegistrationForm(FlaskForm):
     # Campo nome - obrigatório, entre 2 e 100 caracteres
     nome = StringField('Nome', validators=[DataRequired(), Length(min=2, max=100)])
     # Campo email - obrigatório, validado como email
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    email = StringField('E-mail', validators=[DataRequired(), Email()])
     # Campo telefone - obrigatório
     telefone = StringField('Telefone', validators=[DataRequired(), Length(min=9, max=20)])
     # Campo password - obrigatório, mínimo 6 caracteres
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Palavra-passe', validators=[DataRequired(), Length(min=6)])
     # Campo confirmação de password - obrigatório, deve ser igual ao campo password
-    confirm_password = PasswordField('Confirmar Password', validators=[DataRequired(), EqualTo('password')])
+    confirm_password = PasswordField('Confirmar palavra-passe', validators=[DataRequired(), EqualTo('password')])
 
 # Formulário de login
 class LoginForm(FlaskForm):
-    # Campo email - obrigatório, validado como email
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    # Campo password - obrigatório
-    password = PasswordField('Password', validators=[DataRequired()])
+    # Campo e-mail - obrigatório, validado como e-mail
+    email = StringField('E-mail', validators=[DataRequired(), Email()])
+    # Campo palavra-passe - obrigatório
+    password = PasswordField('Palavra-passe', validators=[DataRequired()])
 
 # Formulário de edição de perfil
 class ProfileForm(FlaskForm):
@@ -101,11 +102,13 @@ class AdForm(FlaskForm):
     # Campo tipo - venda ou troca
     tipo = SelectField('Tipo', choices=[('venda', 'Venda'), ('troca', 'Troca')])
     # Campo estado - novo, usado bom ou usado regular
-    estado = SelectField('Estado', choices=[('novo', 'Novo'), ('usado_bueno', 'Usado - Bom'), ('usado_regular', 'Usado - Regular')])
+    estado = SelectField('Estado', choices=[('novo', 'Novo'), ('usado_bom', 'Usado - Em bom estado'), ('usado_regular', 'Usado - Sinais de uso')])
     # Campo categoria - obrigatório, ID da categoria
     categoria_id = SelectField('Categoria', coerce=int, validators=[DataRequired()])
     # Campo localização - opcional, máximo 150 caracteres
     localizacao = StringField('Localização', validators=[Optional(), Length(max=150)])
+    # Campo para destacar o anúncio (pagamento adicional)
+    destacar = BooleanField('Destacar Anúncio')
 
 # Formulário de envio de mensagens
 class MessageForm(FlaskForm):
@@ -114,8 +117,8 @@ class MessageForm(FlaskForm):
 
 # Formulário de recuperação de password
 class ForgotPasswordForm(FlaskForm):
-    # Campo email - obrigatório, validado como email
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    # Campo e-mail - obrigatório, validado como e-mail
+    email = StringField('E-mail', validators=[DataRequired(), Email()])
 
 # ==================== HELPER FUNCTIONS ====================
 
@@ -211,13 +214,21 @@ def home():
 @app.route('/suporte')
 def support():
     return render_template('support.html')
-    
-    # Renderizar template com dados
-    return render_template('index.html',
-                         anuncios=anuncios,
-                         categorias=categorias,
-                         total_anuncios=total_anuncios,
-                         total_utilizadores=total_utilizadores)
+
+# Rota para Política de Privacidade e Cookies
+@app.route('/politica-privacidade')
+def politica_privacidade():
+    return render_template('politica-privacidade.html')
+
+# Rota para Termos e Condições
+@app.route('/termos-condicoes')
+def termos_condicoes():
+    return render_template('termos-condicoes.html')
+
+# Rota para Sobre Nós
+@app.route('/sobre-nos')
+def sobre_nos():
+    return render_template('sobre-nos.html')
 
 # Rota de pesquisa de anúncios
 @app.route('/pesquisar', methods=['GET', 'POST'])
@@ -271,21 +282,28 @@ def view_ad(id):
     # Buscar anúncio pelo ID ou retornar 404
     anuncio = Anuncio.query.get_or_404(id)
     
-    # Incrementar visualizações
-    if current_user.is_authenticated:
-        # Não contar visualizações próprias do anúncio
-        if anuncio.utilizador_id != current_user.id:
+    # Incrementar visualizações (apenas uma vez por sessão)
+    session_key = f'viewed_{id}'
+    if not session.get(session_key):
+        if current_user.is_authenticated:
+            # Não contar visualizações próprias do anúncio
+            if anuncio.utilizador_id != current_user.id:
+                anuncio.views += 1
+                db.session.commit()
+        else:
+            # Contar visualizações de anonymous
             anuncio.views += 1
             db.session.commit()
-    else:
-        # Contar visualizações de anonymous
-        anuncio.views += 1
-        db.session.commit()
+        # Marcar como visto nesta sessão
+        session[session_key] = True
     
     # Verificar se é favorito do utilizador atual
     favorito = False
     if current_user.is_authenticated:
         favorito = is_favorite(id)
+    
+    # Buscar imagens do anúncio
+    imagens = ImagemAnuncio.query.filter_by(anuncio_id=id).order_by(ImagemAnuncio.ordem).all()
     
     # Buscar anúncios relacionados na mesma categoria
     relacionados = Anuncio.query.filter(
@@ -294,11 +312,19 @@ def view_ad(id):
         Anuncio.status == 'ativo'
     ).limit(4).all()
     
+    # Verificar se o utilizador atual pode destacar este anúncio (é o dono e ainda não destacado)
+    pode_destacar = False
+    if current_user.is_authenticated:
+        if anuncio.utilizador_id == current_user.id and not anuncio.destacado:
+            pode_destacar = True
+    
     # Renderizar template do anúncio
     return render_template('ad.html',
                          anuncio=anuncio,
+                         imagens=imagens,
                          favorito=favorito,
-                         relacionados=relacionados)
+                         relacionados=relacionados,
+                         pode_destacar=pode_destacar)
 
 # Rota para visualizar anúncios de uma categoria
 @app.route('/categoria/<slug>')
@@ -331,7 +357,7 @@ def register():
         # Verificar se email já existe no sistema
         existing_user = Utilizador.query.filter_by(email=form.email.data).first()
         if existing_user:
-            flash('Este email já está registado.', 'error')
+            flash('Este endereço de e-mail já está registado.', 'error')
             return render_template('register.html', form=form)
         
         # Criar hash da password
@@ -360,7 +386,7 @@ def register():
         send_account_confirmation_with_token(utilizador, token)
         
         # Exibir mensagem de sucesso e redirecionar para login
-        flash('Conta criada com sucesso! Foi enviado um email com o seu token de recuperação.', 'success')
+        flash('Conta criada com sucesso! Foi enviado um e-mail com o seu token de recuperação.', 'success')
         return redirect(url_for('login'))
     
     # Renderizar template de registo
@@ -396,7 +422,7 @@ def login():
             next_page = request.args.get('next')
             return redirect(next_page or url_for('home'))
         else:
-            flash('Email ou password incorretos.', 'error')
+            flash('E-mail ou palavra-passe incorretos.', 'error')
     
     # Renderizar template de login
     return render_template('login.html', form=form, page='login')
@@ -417,36 +443,39 @@ def logout():
 def profile():
     # Criar instância do formulário
     form = ProfileForm()
-    
+
+    # Buscar anúncios criados por este utilizador (sempre disponíveis)
+    meus_anuncios = Anuncio.query.filter_by(utilizador_id=current_user.id).order_by(Anuncio.created_at.desc()).all()
+
+    # Buscar favoritos do utilizador
+    favoritos = Favorito.query.filter_by(utilizador_id=current_user.id).all()
+    # Extrair anúncios dos favoritos
+    anuncios_favoritos = [f.anuncio for f in favoritos]
+
     # Se formulário foi submetido e é válido
     if form.validate_on_submit():
         # Atualizar dados do utilizador atual
         current_user.nome = form.nome.data
         current_user.telefone = form.telefone.data
-        
+
         # Se nova foto de perfil foi enviada
         if form.foto_perfil.data:
             filename = save_image(form.foto_perfil.data)
             if filename:
                 current_user.foto_perfil = filename
-        
+            else:
+                flash('Erro ao fazer upload da foto. Verifique o formato e tamanho (máx. 16MB, formatos: JPG, PNG, GIF, WebP).', 'error')
+                return render_template('profile.html', form=form, meus_anuncios=meus_anuncios, favoritos=anuncios_favoritos)
+
         # Salvar alterações
         db.session.commit()
         flash('Perfil atualizado com sucesso!', 'success')
         return redirect(url_for('profile'))
-    
+
     # Preencher formulário com dados atuais do utilizador
     form.nome.data = current_user.nome
     form.telefone.data = current_user.telefone
-    
-    # Buscar anúncios criados por este utilizador
-    meus_anuncios = Anuncio.query.filter_by(utilizador_id=current_user.id).order_by(Anuncio.created_at.desc()).all()
-    
-    # Buscar favoritos do utilizador
-    favoritos = Favorito.query.filter_by(utilizador_id=current_user.id).all()
-    # Extrair anúncios dos favoritos
-    anuncios_favoritos = [f.anuncio for f in favoritos]
-    
+
     # Renderizar template de perfil
     return render_template('profile.html',
                          form=form,
@@ -475,9 +504,9 @@ def forgot_password():
             # Enviar email com link de recuperação
             send_password_reset_email(utilizador, token)
             
-            flash('Link de recuperação enviado para o seu email.', 'success')
+            flash('Link de recuperação enviado para o seu e-mail.', 'success')
         else:
-            flash('Email não encontrado.', 'error')
+            flash('E-mail não encontrado.', 'error')
     
     # Renderizar template de recuperação
     return render_template('forgot-password.html', form=form)
@@ -535,6 +564,9 @@ def create_ad():
     
     # Se formulário foi submetido e é válido
     if form.validate_on_submit():
+        # Verificar se o utilizador quer destacar o anúncio
+        quer_destacar = form.destacar.data
+        
         # Criar novo anúncio com dados do formulário
         anuncio = Anuncio(
             titulo=form.titulo.data,
@@ -547,6 +579,10 @@ def create_ad():
             localizacao=form.localizacao.data,
             status='ativo'  # Auto-aprovado para utilizadores normais
         )
+        
+        # Se pediu destaque, definir como pendente até pagamento
+        if quer_destacar:
+            anuncio.status = 'pendente'  # Fica pendente até confirmação do pagamento
         
         # Salvar anúncio no banco de dados
         db.session.add(anuncio)
@@ -568,8 +604,14 @@ def create_ad():
                     db.session.add(imagem)
         
         db.session.commit()
+        
+        # Se pediu destaque, redirecionar para página de pagamento
+        if quer_destacar:
+            flash('Para finalizar, efetue o pagamento do destaque.', 'info')
+            return redirect(url_for('payment', anuncio_id=anuncio.id))
+        
+        # Caso contrário, anúncio criado normalmente
         flash('Anúncio criado com sucesso!', 'success')
-        # Redirecionar para visualização do anúncio
         return redirect(url_for('view_ad', id=anuncio.id))
     
     # Renderizar template de criação de anúncio
@@ -658,7 +700,7 @@ def delete_ad(id):
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], img.arquivo)
             if os.path.exists(filepath):
                 os.remove(filepath)
-        except:
+        except Exception as e:
             pass
     
     # Excluir anúncio do banco de dados
@@ -687,7 +729,7 @@ def delete_image(id, image_id):
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], imagem.arquivo)
         if os.path.exists(filepath):
             os.remove(filepath)
-    except:
+    except Exception as e:
         pass
     
     # Se era a imagem principal, definir outra como principal
@@ -782,7 +824,11 @@ def messages():
         
         # Se ainda não criou entrada para este interlocutor
         if outro_id not in conversas:
+            # Buscar dados do outro utilizador
             utilizador = Utilizador.query.get(outro_id)
+            # Se o utilizador foi eliminado, pular esta conversa
+            if not utilizador:
+                continue
             ultimo_anuncio = Anuncio.query.get(msg.anuncio_id)
             
             conversas[outro_id] = {
@@ -921,9 +967,40 @@ def admin_users():
     if not current_user.is_admin():
         abort(403)
     
-    # Buscar todos os utilizadores
-    utilizadores = Utilizador.query.order_by(Utilizador.created_at.desc()).all()
-    return render_template('admin/users.html', utilizadores=utilizadores)
+    # Obter parâmetros de filtro
+    search = request.args.get('search', '').strip()
+    tipo = request.args.get('tipo', '')
+    status = request.args.get('status', '')
+    
+    # Query base
+    query = Utilizador.query
+    
+    # Aplicar filtros
+    if search:
+        query = query.filter(
+            db.or_(
+                Utilizador.nome.ilike(f'%{search}%'),
+                Utilizador.email.ilike(f'%{search}%'),
+                Utilizador.telefone.ilike(f'%{search}%')
+            )
+        )
+    
+    if tipo:
+        query = query.filter_by(tipo=tipo)
+    
+    if status == 'ativo':
+        query = query.filter_by(ativo=True)
+    elif status == 'inativo':
+        query = query.filter_by(ativo=False)
+    
+    # Ordenar e buscar todos (sem paginação)
+    utilizadores = query.order_by(Utilizador.created_at.desc()).all()
+    
+    return render_template('admin/users.html', 
+                         users=utilizadores,
+                         search=search,
+                         tipo=tipo,
+                         status=status)
 
 # Rota para editar utilizador (admin)
 @app.route('/admin/utilizadores/<int:id>/editar', methods=['GET', 'POST'])
@@ -985,192 +1062,119 @@ def admin_delete_user(id):
     flash('Utilizador apagado!', 'success')
     return redirect(url_for('admin_users'))
 
-# Rota para listar anúncios (admin)
-@app.route('/admin/anuncios')
-@login_required  # Requer autenticação
-def admin_ads():
-    # Verificar se é admin
-    if not current_user.is_admin():
-        abort(403)
-    
-    # Obter filtro de status
-    status = request.args.get('status', 'todos')
-    
-    # Buscar anúncios conforme filtro
-    if status == 'todos':
-        anuncios = Anuncio.query.order_by(Anuncio.created_at.desc()).all()
-    else:
-        anuncios = Anuncio.query.filter_by(status=status).order_by(Anuncio.created_at.desc()).all()
-    
-    return render_template('admin/ads.html', anuncios=anuncios, status=status)
 
-# Rota para moderar anúncio (aprovar/rejeitar)
-@app.route('/admin/anuncios/<int:id>/moderar', methods=['POST'])
+# ==================== SISTEMA DE DESTAQUE DE ANÚNCIOS ====================
+
+@app.route('/destaque/pagamento/<int:anuncio_id>', methods=['GET', 'POST'])
 @login_required  # Requer autenticação
-def admin_moderate_ad(id):
-    # Verificar se é admin
-    if not current_user.is_admin():
-        abort(403)
-    
-    # Obter ação e motivo do formulário
-    acao = request.form.get('acao')
-    motivo = request.form.get('motivo')
-    
+def payment(anuncio_id):
+    """
+    Página de pagamento fictício para destaque de anúncios.
+    O utilizador pode escolher entre MB Way, PayPal ou Cartão (Visa/Mastercard).
+    """
     # Buscar anúncio pelo ID ou retornar 404
-    anuncio = Anuncio.query.get_or_404(id)
+    anuncio = Anuncio.query.get_or_404(anuncio_id)
     
-    # Executar ação de moderação
-    if acao == 'aprovar':
-        anuncio.status = 'ativo'
-        flash('Anúncio aprovado!', 'success')
-    elif acao == 'rejeitar':
-        anuncio.status = 'rejeitado'
-        anuncio.motivo_rejeicao = motivo
-        flash('Anúncio rejeitado.', 'success')
-    
-    # Registrar no log
-    log_admin_action('moderar_anuncio', 'anuncios', id, f'{acao}: {anuncio.titulo}')
-    
-    db.session.commit()
-    return redirect(url_for('admin_ads'))
-
-# Rota para excluir anúncio (admin)
-@app.route('/admin/anuncios/<int:id>/apagar', methods=['POST'])
-@login_required  # Requer autenticação
-def admin_delete_ad(id):
-    # Verificar se é admin
-    if not current_user.is_admin():
+    # Verificar se o utilizador é o dono do anúncio
+    if anuncio.utilizador_id != current_user.id:
         abort(403)
     
-    # Buscar anúncio pelo ID ou retornar 404
-    anuncio = Anuncio.query.get_or_404(id)
+    # Verificar se o anúncio ainda não foi pago/destacado
+    if anuncio.destacado:
+        flash('Este anúncio já foi destacado.', 'info')
+        return redirect(url_for('view_ad', id=anuncio.id))
     
-    # Apagar imagens do disco
-    for img in anuncio.imagens:
-        try:
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], img.arquivo)
-            if os.path.exists(filepath):
-                os.remove(filepath)
-        except:
-            pass
-    
-    # Registrar no log antes de excluir
-    log_admin_action('apagar_anuncio', 'anuncios', id, f'Anúncio apagado: {anuncio.titulo}')
-    
-    # Excluir anúncio
-    db.session.delete(anuncio)
-    db.session.commit()
-    
-    flash('Anúncio apagado!', 'success')
-    return redirect(url_for('admin_ads'))
-
-# Rota para gerir categorias (admin)
-@app.route('/admin/categorias', methods=['GET', 'POST'])
-@login_required  # Requer autenticação
-def admin_categories():
-    # Verificar se é admin
-    if not current_user.is_admin():
-        abort(403)
-    
-    # Se foi submetido formulário de criação
+    # Se formulário submetido (confirmação de pagamento)
     if request.method == 'POST':
-        # Obter dados do formulário
-        nome = request.form.get('nome')
-        slug = request.form.get('slug')
-        descricao = request.form.get('descricao')
-        icone = request.form.get('icone')
+        metodo = request.form.get('metodo')
         
-        # Criar nova categoria
-        categoria = Categoria(
-            nome=nome,
-            slug=slug,
-            descricao=descricao,
-            icone=icone
-        )
+        # Validar método de pagamento
+        metodos_permitidos = ['mbway', 'paypal', 'cartao']
+        if metodo not in metodos_permitidos:
+            flash('Método de pagamento inválido.', 'error')
+            return redirect(url_for('payment', anuncio_id=anuncio.id))
         
-        db.session.add(categoria)
+        # Simular processamento de pagamento (sempre sucesso)
+        # Em produção, integraria com API de pagamento real
+        
+        # Gerar ID de transação fictício
+        import random
+        import string
+        transacao_id = 'TRX' + ''.join(random.choices(string.digits, k=12))
+        
+        # Atualizar anúncio com dados do destaque
+        anuncio.destacado = True
+        anuncio.tipo_destaque = 'destaque'
+        anuncio.destaque_inicio = datetime.utcnow()
+        anuncio.destaque_fim = datetime.utcnow() + timedelta(days=7)  # 7 dias de destaque
+        anuncio.destaque_valor = 4.50
+        anuncio.metodo_pagamento = metodo
+        anuncio.transacao_id = transacao_id
+        
+        # Se foi pago, mudar status para ativo (caso estivesse pendente)
+        if anuncio.status == 'pendente':
+            anuncio.status = 'ativo'
+        
         db.session.commit()
         
-        # Registrar no log
-        log_admin_action('criar_categoria', 'categorias', categoria.id, f'Categoria: {nome}')
-        
-        flash('Categoria criada!', 'success')
-        return redirect(url_for('admin_categories'))
+        flash('Pagamento confirmado! Anúncio destacado com sucesso por 7 dias.', 'success')
+        return redirect(url_for('view_ad', id=anuncio.id))
     
-    # Buscar todas as categorias
-    categorias = Categoria.query.order_by(Categoria.ordem).all()
-    return render_template('admin/categories.html', categorias=categorias)
+    # Renderizar página de pagamento
+    return render_template('payment.html', anuncio=anuncio, valor_destaque=4.50)
 
-# Rota para listar denúncias (admin)
-@app.route('/admin/denuncias')
-@login_required  # Requer autenticação
-def admin_reports():
-    # Verificar se é admin
-    if not current_user.is_admin():
-        abort(403)
+
+@app.route('/destaque/check-band', methods=['POST'])
+@login_required
+def check_card_band():
+    """
+    API AJAX para detectar bandeira do cartão (Visa/Mastercard) pelo número.
+    """
+    import re
+    data = request.get_json()
+    numero = data.get('numero', '').replace(' ', '')
     
-    # Buscar todas as denúncias
-    denuncias = Denuncia.query.order_by(Denuncia.created_at.desc()).all()
-    return render_template('admin/reports.html', denuncias=denuncias)
-
-# Rota para listar logs de admin (admin)
-@app.route('/admin/logs')
-@login_required  # Requer autenticação
-def admin_logs():
-    # Verificar se é admin
-    if not current_user.is_admin():
-        abort(403)
+    # Remover caracteres não numéricos
+    numero = re.sub(r'\D', '', numero)
     
-    # Buscar últimos 100 logs
-    logs = LogAdmin.query.order_by(LogAdmin.created_at.desc()).limit(100).all()
-    return render_template('admin/logs.html', logs=logs)
-
-# API para obter estatísticas em JSON
-@app.route('/api/admin/stats')
-@login_required  # Requer autenticação
-def api_admin_stats():
-    # Verificar se é admin
-    if not current_user.is_admin():
-        abort(403)
+    bandeira = None
+    if len(numero) >= 6:
+        # Visa começa com 4
+        if numero.startswith('4'):
+            bandeira = 'visa'
+        # Mastercard começa com 51-55
+        elif 51 <= int(numero[:2]) <= 55:
+            bandeira = 'mastercard'
     
-    # Retornar estatísticas em JSON
-    return jsonify({
-        'total_utilizadores': Utilizador.query.count(),
-        'total_anuncios': Anuncio.query.count(),
-        'anuncios_pendentes': Anuncio.query.filter_by(status='pendente').count(),
-        'anuncios_ativos': Anuncio.query.filter_by(status='ativo').count(),
-        'denuncias_pendentes': Denuncia.query.filter_by(status='pendente').count()
-    })
+    return {'bandeira': bandeira}
 
-# ==================== ERROR HANDLERS ====================
 
-# Tratamento de erro 404 - Página não encontrada
-@app.errorhandler(404)
-def error_404(e):
-    return render_template('error.html', error='Página não encontrada'), 404
 
-# Tratamento de erro 403 - Acesso negado
-@app.errorhandler(403)
-def error_403(e):
-    return render_template('error.html', error='Acesso negado'), 403
 
-# Tratamento de erro 500 - Erro interno do servidor
-@app.errorhandler(500)
-def error_500(e):
-    return render_template('error.html', error='Erro interno do servidor'), 500
-
-# ==================== MAIN ====================
-
-# Ponto de entrada da aplicação
 if __name__ == '__main__':
     # Criar pastas necessárias para uploads
     upload_path = app.config['UPLOAD_FOLDER']
     if not os.path.exists(upload_path):
         os.makedirs(upload_path, exist_ok=True)
     
-    # Obter porta do ambiente ou usar 5000 como padrão
-    port = int(os.environ.get('PORT', 5000))
-    # Iniciar servidor Flask (debug=False para producao)
+    # Obter IP local do PC
+    def get_local_ip():
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(('8.8.8.8', 80))
+            ip = s.getsockname()[0]
+        except Exception as e:
+            ip = '127.0.0.1'
+        finally:
+            s.close()
+        return ip
+    
+    # Iniciar servidor Flask
     debug = os.environ.get('FLASK_ENV') != 'production'
-    port = int(os.environ.get('PORT', 10000))
+    port = int(os.environ.get('PORT', 3000))
+    print(f"\n=== TROCAS ONLINE! ===")
+    print(f"No PC: http://localhost:{port}")
+    print(f"No telemóvel: http://{get_local_ip()}:{port}")
+    print(f"=====================\n")
     app.run(host='0.0.0.0', port=port, debug=debug)

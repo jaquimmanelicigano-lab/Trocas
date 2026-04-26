@@ -10,20 +10,16 @@ load_dotenv()
 class Config:
     # Chave secreta usada para sessões e proteção CSRF - usa variável de ambiente ou fallback
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'trocas-flask-secret-key-2024'
-    
+
     # Configurações do banco de dados - usam SQLite para simplicidade
     # MYSQL_HOST = os.environ.get('DB_HOST') or 'localhost'
     # MYSQL_USER = os.environ.get('DB_USER') or 'root'
     # MYSQL_PASSWORD = os.environ.get('DB_PASSWORD') or ''
     # MYSQL_DB = os.environ.get('DB_NAME') or 'trocas_db'
-    
-    # URI de conexão SQLAlchemy - usa variavel DATABASE_URL (PostgreSQL no Render) ou MySQL local
-    # Forçar psycopg2 para compatibilidade
-    db_url = os.environ.get('DATABASE_URL') or 'mysql://root:teste123@127.0.0.1:3306/trocas_db'
-    # Usar postgresql+psycopg2:// (não psycopg)
-    if 'postgresql://' in db_url:
-        db_url = db_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
-    SQLALCHEMY_DATABASE_URI = db_url
+
+    # URI de conexão SQLAlchemy - SQLite local com caminho absoluto
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'instance', 'trocas.db')
     # Desativar rastreamento de modificações para melhor desempenho
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     

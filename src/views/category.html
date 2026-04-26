@@ -3,6 +3,30 @@
 <!-- Main Content - Página de Categoria -->
 <main class="main">
   <div class="container">
+    <!-- Flash Messages -->
+    {% with errors = get_flashed_messages(category_filter=['error']) %}
+      {% if errors %}
+        <div class="alert alert-error mb-4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {% for err in errors %}
+              <span><i class="fas fa-exclamation-circle"></i> {{ err }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% with success = get_flashed_messages(category_filter=['success']) %}
+      {% if success %}
+        <div class="alert alert-success mb-4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {% for msg in success %}
+              <span><i class="fas fa-check-circle"></i> {{ msg }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+
     <!-- Breadcrumb -->
     <nav class="breadcrumb mb-3">
       <a href="{{ url_for('home') }}">Início</a>

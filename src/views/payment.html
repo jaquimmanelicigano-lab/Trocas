@@ -1,0 +1,188 @@
+{% include 'partials/header.html' %}
+
+<!-- Main Content - Página de Pagamento -->
+<main class="main">
+  <div class="container">
+    <div style="max-width: 520px; margin: 0 auto;">
+      
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb mb-3">
+        <a href="{{ url_for('home') }}">Início</a>
+        <i class="fas fa-chevron-right separator"></i>
+        <a href="{{ url_for('view_ad', id=anuncio.id) }}">Anúncio</a>
+        <i class="fas fa-chevron-right separator"></i>
+        <span>Pagamento</span>
+      </nav>
+
+      <!-- Card do Pagamento -->
+      <div class="card">
+        <div class="card-header" style="background: var(--primary); color: #fff;">
+          <h2 class="card-title" style="color: #fff; margin-bottom: 0;">
+            <i class="fas fa-credit-card"></i> Destacar Anúncio
+          </h2>
+          <p style="opacity: 0.9; font-size: 14px; margin-top: 4px;">Escolha a forma de pagamento</p>
+        </div>
+        <div class="card-body" style="padding: 32px;">
+          
+          <!-- Resumo do Pedido -->
+          <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid var(--border);">
+            <div style="font-weight: 600; margin-bottom: 8px;">Resumo do Pedido</div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span>Anúncio:</span>
+              <span style="max-width: 60%; text-align: right;">{{ anuncio.titulo[:50] }}{% if anuncio.titulo|length > 50 %}...{% endif %}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span>Serviço:</span>
+              <span>Destaque (7 dias)</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.125rem; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+              <span>Total a pagar:</span>
+              <span>{{ "%.2f"|format(valor_destaque) }} €</span>
+            </div>
+          </div>
+
+          <!-- Formulário de Pagamento -->
+          <form action="{{ url_for('payment', anuncio_id=anuncio.id) }}" method="POST" id="paymentForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <!-- Métodos de Pagamento -->
+            <div style="margin-bottom: 20px;">
+              <label class="form-label">Método de Pagamento</label>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                
+                <!-- MB Way -->
+                <label style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="payment-option">
+                  <input type="radio" name="metodo" value="mbway" required style="width: 18px; height: 18px; accent-color: var(--primary);">
+                  <div style="flex: 1;">
+                    <div style="font-weight: 600;"><i class="fas fa-mobile-alt" style="color: #00b945;"></i> MB Way</div>
+                    <div class="text-secondary small">Pagamento instantâneo via aplicação bancária</div>
+                  </div>
+                </label>
+
+                <!-- PayPal -->
+                <label style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="payment-option">
+                  <input type="radio" name="metodo" value="paypal" style="width: 18px; height: 18px; accent-color: var(--primary);">
+                  <div style="flex: 1;">
+                    <div style="font-weight: 600;"><i class="fab fa-paypal" style="color: #003087;"></i> PayPal</div>
+                    <div class="text-secondary small">Pague com sua conta PayPal</div>
+                  </div>
+                </label>
+
+                <!-- Cartão -->
+                <label style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="payment-option" id="cardOption">
+                  <input type="radio" name="metodo" value="cartao" style="width: 18px; height: 18px; accent-color: var(--primary);">
+                  <div style="flex: 1;">
+                    <div style="font-weight: 600;"><i class="far fa-credit-card" style="color: #6366f1;"></i> Cartão de Crédito/Débito</div>
+                    <div class="text-secondary small">Visa ou Mastercard</div>
+                  </div>
+                </label>
+
+              </div>
+            </div>
+
+            <!-- Campos do Cartão (inicialmente escondidos) -->
+            <div id="cardFields" style="display: none; background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border);">
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label">Número do Cartão</label>
+                <input type="text" name="card_numero" id="cardNumero" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="cc-number">
+                <span id="cardBandeira" style="font-size: 12px; color: var(--primary); font-weight: 600; margin-top: 4px; display: block;"></span>
+              </div>
+              <div class="form-row" style="display: flex; gap: 12px;">
+                <div class="form-group" style="flex: 1;">
+                  <label class="form-label">Validade</label>
+                  <input type="text" name="card_validade" class="form-control" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                  <label class="form-label">CVV</label>
+                  <input type="text" name="card_cvv" class="form-control" placeholder="123" maxlength="3" autocomplete="cc-csc">
+                </div>
+              </div>
+            </div>
+
+            <!-- Botões -->
+            <div class="d-flex gap-2" style="margin-top: 24px;">
+              <button type="submit" class="btn btn-primary btn-block" style="flex: 1; height: 52px; font-size: 1.1rem;">
+                <i class="fas fa-lock"></i> Pagar 4,50 €
+              </button>
+              <a href="{{ url_for('view_ad', id=anuncio.id) }}" class="btn btn-outline" style="flex: 1; height: 52px;">
+                Cancelar
+              </a>
+            </div>
+
+            <p class="text-secondary small text-center mt-2">
+              <i class="fas fa-shield-alt"></i> Pagamento 100% seguro. Simulação para demonstração.
+            </p>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- JavaScript para validação de cartão -->
+<script>
+  // Mostrar/ocultar campos do cartão conforme método selecionado
+  document.querySelectorAll('input[name="metodo"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      const cardFields = document.getElementById('cardFields');
+      if (this.value === 'cartao') {
+        cardFields.style.display = 'block';
+      } else {
+        cardFields.style.display = 'none';
+      }
+    });
+  });
+
+  // Detectar bandeira do cartão enquanto digita
+  document.getElementById('cardNumero').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    // Formatar com espaços a cada 4 dígitos
+    value = value.match(/.{1,4}/g)?.join(' ') || value;
+    e.target.value = value;
+
+    // Detectar bandeira
+    const bandeiraSpan = document.getElementById('cardBandeira');
+    const cleanNum = value.replace(/\s/g, '');
+    if (cleanNum.length >= 6) {
+      fetch('{{ url_for("check_card_band") }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+        },
+        body: JSON.stringify({ numero: cleanNum })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.bandeira === 'visa') {
+          bandeiraSpan.textContent = '💳 Visa';
+          bandeiraSpan.style.color = '#1a1f71';
+        } else if (data.bandeira === 'mastercard') {
+          bandeiraSpan.textContent = '💳 Mastercard';
+          bandeiraSpan.style.color = '#eb001b';
+        } else {
+          bandeiraSpan.textContent = '';
+        }
+      });
+    } else {
+      bandeiraSpan.textContent = '';
+    }
+  });
+
+  // Máscara de validade (MM/AA)
+  document.querySelector('input[name="card_validade"]').addEventListener('input', function(e) {
+    let v = e.target.value.replace(/\D/g, '');
+    if (v.length >= 2) {
+      v = v.substring(0, 2) + '/' + v.substring(2, 4);
+    }
+    e.target.value = v;
+  });
+
+  // Apenas números no CVV
+  document.querySelector('input[name="card_cvv"]').addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/\D/g, '');
+  });
+</script>
+
+{% include 'partials/footer.html' %}

@@ -3,6 +3,30 @@
 <!-- Main Content - Página do Assistente de Suporte -->
 <main class="main">
   <div class="container">
+    <!-- Flash Messages -->
+    {% with errors = get_flashed_messages(category_filter=['error']) %}
+      {% if errors %}
+        <div class="alert alert-error mb-4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {% for err in errors %}
+              <span><i class="fas fa-exclamation-circle"></i> {{ err }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% with success = get_flashed_messages(category_filter=['success']) %}
+      {% if success %}
+        <div class="alert alert-success mb-4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {% for msg in success %}
+              <span><i class="fas fa-check-circle"></i> {{ msg }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+
     <div class="section-header mb-4">
       <h1 class="section-title"><i class="fas fa-headset"></i> Centro de Ajuda</h1>
       <p class="text-secondary">Pergunte ao nosso assistente virtual ou veja as perguntas frequentes</p>

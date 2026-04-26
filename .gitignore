@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Flask/SQLite
+instance/
+*.db
+
+# Uploads (Devem ser geridos via volumes ou cloud storage)
+src/public/images/uploads/*
+!src/public/images/uploads/.gitkeep
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -10,12 +10,7 @@
           <p class="text-secondary small" style="max-width: 250px; line-height: 1.6;">
             A sua plataforma de confiança para trocas e vendas seguras em Portugal. Junte-se a milhares de utilizadores.
           </p>
-          <!-- Links das redes sociais -->
-          <div class="social-links mt-3" style="display: flex; gap: 12px;">
-            <a href="#" class="text-secondary"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="text-secondary"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="text-secondary"><i class="fab fa-twitter"></i></a>
-          </div>
+
         </div>
         
         <!-- Links da plataforma -->
@@ -44,10 +39,10 @@
         <div>
           <h4 class="footer-title">Informações</h4>
           <div class="footer-links">
-            <a href="#">Termos e Condições</a>
-            <a href="#">Privacidade</a>
-            <a href="#">Cookies</a>
-            <a href="#">Sobre Nós</a>
+            <a href="{{ url_for('termos_condicoes') }}">Termos e Condições</a>
+            <a href="{{ url_for('politica_privacidade') }}">Privacidade</a>
+            <a href="{{ url_for('politica_privacidade') }}">Cookies</a>
+            <a href="{{ url_for('sobre_nos') }}">Sobre Nós</a>
           </div>
         </div>
       </div>
@@ -59,32 +54,13 @@
     </div>
   </footer>
 
-  <!-- JavaScript para interatividade do site -->
-  <script>
+   <!-- JavaScript para interatividade do site -->
+   <script>
     // Executa quando o DOM está completamente carregado
     document.addEventListener('DOMContentLoaded', function() {
       
-      // === Dropdown do utilizador ===
-      const dropdown = document.getElementById('userDropdown');
-      const trigger = document.getElementById('userDropdownTrigger');
-      const menu = document.getElementById('userDropdownMenu');
-      
-      if (dropdown && trigger && menu) {
-        // Toggle do menu ao clicar no avatar/nome
-        trigger.addEventListener('click', function(e) {
-          e.stopPropagation();
-          dropdown.classList.toggle('active');
-        });
-        
-        // Fecha o dropdown ao clicar fora
-        document.addEventListener('click', function(e) {
-          if (!dropdown.contains(e.target)) {
-            dropdown.classList.remove('active');
-          }
-        });
-      }
-      
-      // === Menu mobile ===
+      // === Menu mobile (hambúrguer) ===
+      // O botão .mobile-menu-toggle está no header e mostra/esconde o menu em telas pequenas
       const mobileToggle = document.querySelector('.mobile-menu-toggle');
       const navLinks = document.querySelector('.nav-links');
       
@@ -96,27 +72,31 @@
       
     });
 
-    // === Chat Widget Functions ===
+    // === Assistente de IA - Chat Widget ===
     const chatAnswers = {
       'publicar': 'Para publicar um anúncio, faça login e clique em "Anunciar" no menu.',
-      'mensagens': 'Para ver as mensagens, clique em "Mensagens" no menu.',
+      'mensagens': 'Para ver as mensagens, clique em "Mensagens" no menu do utilizador.',
       'recuperar': 'Se esqueceu a password, clique em "Esqueceu-se?" na página de login.',
       'editar': 'Para editar o perfil, clique no seu nome no menu e depois em "Perfil".',
       'favoritos': 'Clique no ícone de coração num anúncio para adicionar aos favoritos.',
       'imagens': 'Ao criar anúncio, clique na zona de upload para selecionar imagens.',
-      'contactar': 'Visite o anúncio e clique em "Enviar Mensagem" para contactar.',
-      'eliminar': 'Vá ao seu Perfil, encontre o anúncio e clique em "Apagar".'
+      'contactar': 'Visite o anúncio e clique em "Enviar Mensagem" para contactar o vendedor.',
+      'eliminar': 'Vá ao seu Perfil, encontre o anúncio e clique em "Apagar".',
+      'ajuda': 'Pode perguntar sobre publicar anúncios, mensagens, recuperar password, editar perfil, favoritos, imagens, contactar vendedores ou eliminar anúncios.',
+      'troca': 'Na Trocas, pode comprar, vender ou trocar produtos. Basta publicar um anúncio ou responder a anúncios existentes.'
     };
 
     const chatKeywords = {
       'publicar': 'publicar', 'anúncio': 'publicar', 'anuncio': 'publicar', 'criar': 'publicar',
-      'mensagem': 'mensagens', 'mensagens': 'mensagens', 'chat': 'mensagens',
-      'password': 'recuperar', 'pass': 'recuperar', 'esqueci': 'recuperar',
-      'perfil': 'editar', 'editar': 'editar',
-      'favorito': 'favoritos', 'heart': 'favoritos',
-      'imagem': 'imagens', 'foto': 'imagens',
-      'contactar': 'contactar', 'vendedor': 'contactar',
-      'eliminar': 'eliminar', 'apagar': 'eliminar'
+      'mensagem': 'mensagens', 'mensagens': 'mensagens', 'chat': 'mensagens', 'caixa': 'mensagens',
+      'password': 'recuperar', 'pass': 'recuperar', 'esqueci': 'recuperar', 'recuperar': 'recuperar',
+      'perfil': 'editar', 'editar': 'editar', 'alterar': 'editar',
+      'favorito': 'favoritos', 'heart': 'favoritos', 'gosto': 'favoritos',
+      'imagem': 'imagens', 'foto': 'imagens', 'imagens': 'imagens',
+      'contactar': 'contactar', 'vendedor': 'contactar', 'mensagem': 'contactar',
+      'eliminar': 'eliminar', 'apagar': 'eliminar', 'remover': 'eliminar',
+      'ajuda': 'ajuda', 'help': 'ajuda', 'socorro': 'ajuda',
+      'troca': 'troca', 'trocar': 'troca', 'trocas': 'troca', 'vender': 'troca', 'comprar': 'troca'
     };
 
     function toggleChatWidget() {
@@ -154,8 +134,9 @@
       for (let k in chatKeywords) {
         if (lower.includes(k)) return chatAnswers[chatKeywords[k]];
       }
-      return 'Desculpe, não entendi. Pode perguntar sobre publicar anúncios, mensagens, recuperar password, etc.';
+      return 'Desculpe, não entendi. Pode perguntar sobre: publicar anúncios, mensagens, recuperar password, editar perfil, favoritos, imagens, contactar vendedores ou eliminar anúncios.';
     }
-  </script>
-</body>
-</html>
+   </script>
+   
+   </body>
+   </html>

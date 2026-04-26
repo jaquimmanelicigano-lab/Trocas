@@ -3,6 +3,30 @@
 <!-- Main Content - Página de Detalhes do Anúncio -->
 <main class="main">
   <div class="container">
+    <!-- Flash Messages -->
+    {% with errors = get_flashed_messages(category_filter=['error']) %}
+      {% if errors %}
+        <div class="alert alert-error mb-4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {% for err in errors %}
+              <span><i class="fas fa-exclamation-circle"></i> {{ err }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% with success = get_flashed_messages(category_filter=['success']) %}
+      {% if success %}
+        <div class="alert alert-success mb-4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {% for msg in success %}
+              <span><i class="fas fa-check-circle"></i> {{ msg }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+
     <div class="ad-layout">
       <!-- Main Content Area - Área Principal -->
       <div class="ad-main-content">
@@ -84,6 +108,61 @@
               </div>
             </div>
 
+            <!-- Badge de Destaque (se aplicável) -->
+            {% if anuncio.destacado %}
+              <div class="ad-destaque-badge" style="
+                background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+                color: #1a1a1a;
+                padding: 10px 16px;
+                border-radius: 8px;
+                margin-bottom: 16px;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+              ">
+                <i class="fas fa-star" style="color: #1a1a1a;"></i>
+                <div>
+                  <div>Anúncio Destacado</div>
+                  <div style="font-size: 12px; font-weight: 500; opacity: 0.9;">
+                    Destacado até {{ anuncio.destaque_fim.strftime('%d/%m/%Y') if anuncio.destaque_fim else 'data indeterminada' }}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+
+            <!-- Botão para Destacar (apenas se for o dono e não estiver destacado) -->
+            {% if pode_destacar %}
+              <div class="ad-destaque-cta" style="
+                background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                color: white;
+                padding: 16px;
+                border-radius: 8px;
+                margin-bottom: 16px;
+                text-align: center;
+              ">
+                <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 4px;">
+                  <i class="fas fa-rocket"></i> Aumente a Visibilidade
+                </div>
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 12px;">
+                  Destacar este anúncio por apenas <strong>4,50 €</strong> (7 dias)
+                </div>
+                <a href="{{ url_for('payment', anuncio_id=anuncio.id) }}" class="btn" style="
+                  background: white;
+                  color: #6366f1;
+                  border: none;
+                  padding: 10px 24px;
+                  border-radius: 6px;
+                  font-weight: 600;
+                  text-decoration: none;
+                  display: inline-block;
+                ">
+                  Destacar Agora
+                </a>
+              </div>
+            {% endif %}
+
             <!-- Ações do anúncio -->
             <div class="ad-actions mt-4">
               {% if current_user.is_authenticated and current_user.id != anuncio.utilizador_id %}
@@ -120,12 +199,16 @@
             <h3 class="card-title small-caps mb-3">Vendedor</h3>
             <div class="seller-profile">
               <div class="user-avatar large">
-                {{ anuncio.utilizador_nome[0]|upper }}
+                {% if anuncio.utilizador.foto_perfil %}
+                  <img src="{{ url_for('static', filename='images/uploads/' + anuncio.utilizador.foto_perfil) }}" alt="Foto do vendedor" class="profile-header-photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                {% else %}
+                  {{ anuncio.utilizador_nome[0]|upper }}
+                {% endif %}
               </div>
               <div class="seller-details">
                 <span class="seller-name">{{ anuncio.utilizador_nome }}</span>
-                {% if anuncio.utilizador_telefone %}
-                  <span class="seller-phone"><i class="fas fa-phone"></i> {{ anuncio.utilizador_telefone }}</span>
+                {% if anuncio.utilizador.telefone %}
+                  <span class="seller-phone"><i class="fas fa-phone"></i> {{ anuncio.utilizador.telefone }}</span>
                 {% endif %}
               </div>
             </div>

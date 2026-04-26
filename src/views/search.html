@@ -3,43 +3,81 @@
 <!-- Main Content - Página de Pesquisa -->
 <main class="main">
   <div class="container">
+    <!-- Flash Messages -->
+    {% with errors = get_flashed_messages(category_filter=['error']) %}
+      {% if errors %}
+        <div class="alert alert-error mb-4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {% for err in errors %}
+              <span><i class="fas fa-exclamation-circle"></i> {{ err }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% with success = get_flashed_messages(category_filter=['success']) %}
+      {% if success %}
+        <div class="alert alert-success mb-4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {% for msg in success %}
+              <span><i class="fas fa-check-circle"></i> {{ msg }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+
     <!-- Breadcrumb -->
-    <nav class="breadcrumb mb-3">
+    <nav class="breadcrumb mb-4">
       <a href="{{ url_for('home') }}">Início</a>
       <i class="fas fa-chevron-right separator"></i>
-      <span>Pesquisa</span>
+      <span>Explorar</span>
     </nav>
+
+    <!-- Page Header -->
+    <div class="search-header mb-4">
+      <h1 class="search-title"> Explorar Anúncios</h1>
+      <p class="search-subtitle">Encontre o que precisa entre milhares de anúncios</p>
+    </div>
 
     <!-- Filters - Filtros de Pesquisa -->
     <form action="{{ url_for('search') }}" method="GET" class="filters">
       <div class="filters-grid">
-        <div class="flex-1">
-          <label class="form-label">Palavra-chave</label>
-          <input type="text" name="q" class="form-control" placeholder="O que procura?" value="{{ query if query else '' }}">
+        <div class="search-field">
+          <label class="form-label">
+            <i class="fas fa-search"></i> Palavra-chave
+          </label>
+          <input type="text" name="q" class="form-control form-control-lg" placeholder="O que está a procura?" value="{{ query if query else '' }}">
         </div>
-        <div>
-          <label class="form-label">Categoria</label>
+        <div class="filter-field">
+          <label class="form-label">
+            <i class="fas fa-folder"></i> Categoria
+          </label>
           <select name="categoria" class="filter-select">
             <option value="">Todas as Categorias</option>
             {% for cat in categorias %}
-              <option value="{{ cat.slug }}" {% if selected_categoria == cat.id %}selected{% endif %}>{{ cat.nome }}</option>
+              <option value="{{ cat.id }}" {% if selected_categoria == cat.id %}selected{% endif %}>{{ cat.nome }}</option>
             {% endfor %}
           </select>
         </div>
-        <div>
-          <label class="form-label">Tipo de Negócio</label>
+        <div class="filter-field">
+          <label class="form-label">
+            <i class="fas fa-exchange-alt"></i> Tipo
+          </label>
           <select name="tipo" class="filter-select">
             <option value="">Qualquer tipo</option>
-            <option value="venda" {% if selected_tipo == 'venda' %}selected{% endif %}>Venda</option>
-            <option value="troca" {% if selected_tipo == 'troca' %}selected{% endif %}>Troca</option>
+            <option value="venda" {% if selected_tipo == 'venda' %}selected{% endif %}>A Vender</option>
+            <option value="troca" {% if selected_tipo == 'troca' %}selected{% endif %}>Para Troca</option>
           </select>
         </div>
-        <div>
-          <label class="form-label">Localização</label>
-          <input type="text" name="localizacao" class="form-control" placeholder="Cidade ou região" value="{{ selected_localizacao if selected_localizacao else '' }}">
+        <div class="search-field">
+          <label class="form-label">
+            <i class="fas fa-map-marker-alt"></i> Localização
+          </label>
+          <input type="text" name="localizacao" class="form-control form-control-lg" placeholder="Cidade ou região" value="{{ selected_localizacao if selected_localizacao else '' }}">
         </div>
-        <div class="d-flex align-end">
-          <button type="submit" class="btn btn-primary btn-block" style="height: 48px;">
+        <div class="search-button">
+          <button type="submit" class="btn btn-primary btn-lg">
             <i class="fas fa-search"></i> Pesquisar
           </button>
         </div>
@@ -47,20 +85,35 @@
     </form>
 
     <!-- Results Header - Cabeçalho dos Resultados -->
-    <div class="section-header mb-4">
-      <h2 class="section-title">
-        {% if anuncios|length == 0 %}
-          Nenhum resultado encontrado
-        {% else %}
-          {{ anuncios|length }} resultado{{ '' if anuncios|length == 1 else 's' }} encontrado{{ '' if anuncios|length == 1 else 's' }}
-          {% if query %} para "{{ query }}"{% endif %}
-        {% endif %}
-      </h2>
+    <div class="search-results-header mb-4">
+      {% if anuncios %}
+        <div class="results-info">
+          <h2 class="results-count">{{ anuncios|length }} resultado{{ '' if anuncios|length == 1 else 's' }}</h2>
+          {% if query %}
+            <p class="results-query">Para "{{ query }}"</p>
+          {% endif %}
+        </div>
+        <div class="results-sort">
+          <label class="form-label small">Ordenar por:</label>
+          <select class="filter-select" onchange="location = this.value;">
+            <option value="{{ url_for('search', q=query, categoria=selected_categoria, tipo=selected_tipo, localizacao=selected_localizacao, sort='recent') }}" {% if request.args.get('sort') != 'price_asc' and request.args.get('sort') != 'price_desc' %}selected{% endif %}>Mais Recentes</option>
+            <option value="{{ url_for('search', q=query, categoria=selected_categoria, tipo=selected_tipo, localizacao=selected_localizacao, sort='price_asc') }}" {% if request.args.get('sort') == 'price_asc' %}selected{% endif %}>Menor Preço</option>
+            <option value="{{ url_for('search', q=query, categoria=selected_categoria, tipo=selected_tipo, localizacao=selected_localizacao, sort='price_desc') }}" {% if request.args.get('sort') == 'price_desc' %}selected{% endif %}>Maior Preço</option>
+          </select>
+        </div>
+      {% else %}
+        <div class="no-results-title">
+          <h2>Nenhum resultado encontrado</h2>
+          {% if query %}
+            <p>A sua pesquisa por "{{ query }}" não retornou nenhum anúncio.</p>
+          {% endif %}
+        </div>
+      {% endif %}
     </div>
 
     <!-- Results - Resultados da Pesquisa -->
     {% if anuncios %}
-      <div class="ads-grid">
+      <div class="ads-grid search-results">
         {% for ad in anuncios %}
           <a href="{{ url_for('view_ad', id=ad.id) }}" class="ad-card">
             <div class="ad-img">
@@ -99,9 +152,13 @@
         <div class="empty-state-icon"><i class="fas fa-search"></i></div>
         <h3>Nenhum resultado disponível</h3>
         <p>Não encontramos nenhum anúncio com os filtros selecionados.</p>
-        <div class="mt-2">
-          <a href="{{ url_for('search') }}" class="btn btn-outline">Limpar Filtros</a>
-          <a href="{{ url_for('create_ad') }}" class="btn btn-primary ml-1">Criar o Meu Anúncio</a>
+        <div class="mt-3">
+          <a href="{{ url_for('search') }}" class="btn btn-outline btn-lg">
+            <i class="fas fa-redo"></i> Limpar Filtros
+          </a>
+          <a href="{{ url_for('create_ad') }}" class="btn btn-primary btn-lg ml-2">
+            <i class="fas fa-plus"></i> Criar o Meu Anúncio
+          </a>
         </div>
       </div>
     {% endif %}

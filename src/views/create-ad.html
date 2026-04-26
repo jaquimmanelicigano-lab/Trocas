@@ -15,32 +15,33 @@
       <div class="card">
         <div class="card-header" style="background: var(--primary); color: #fff;">
           <h2 class="card-title" style="color: #fff; margin-bottom: 0;">Criar Novo Anúncio</h2>
-          <p style="opacity: 0.9; font-size: 14px; margin-top: 4px;">Preencha os campos abaixo para publicar o seu produto</p>
+          <p style="opacity: 0.9; font-size: 14px; margin-top: 4px;">Preencha os campos abaixo para publicar o seu
+            produto</p>
         </div>
         <div class="card-body" style="padding: 32px;">
-          
           <!-- Mensagens de erro -->
           {% with errors = get_flashed_messages(category_filter=['error']) %}
-            {% if errors %}
-              <div class="alert alert-error mb-4">
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                  {% for err in errors %}
-                    <span><i class="fas fa-exclamation-circle"></i> {{ err }}</span>
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
+          {% if errors %}
+          <div class="alert alert-error mb-4">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              {% for err in errors %}
+              <span><i class="fas fa-exclamation-circle"></i> {{ err }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
           {% endwith %}
 
           <!-- Formulário de Criação -->
           <form action="{{ url_for('create_ad') }}" method="POST" enctype="multipart/form-data" class="modern-form">
             <!-- Token CSRF -->
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            
+
             <!-- Título do Anúncio -->
             <div class="form-group">
-              <label class="form-label">O que pretende announce? <span style="color: var(--danger);">*</span></label>
-              <input type="text" name="titulo" class="form-control" style="font-size: 1.125rem; padding: 0.875rem;" required placeholder="Ex: Bicicleta de Estrada Carbono - Tamanho 54" minlength="5" maxlength="200">
+              <label class="form-label">O que pretende anunciar? <span style="color: var(--danger);">*</span></label>
+              <input type="text" name="titulo" class="form-control" style="font-size: 1.125rem; padding: 0.875rem;"
+                required placeholder="Ex: Bicicleta de Estrada Carbono - Tamanho 54" minlength="5" maxlength="200">
               <p class="text-secondary small mt-1">Um título claro ajuda a vender mais rápido.</p>
             </div>
 
@@ -51,7 +52,7 @@
                 <select name="categoria_id" class="filter-select" required style="height: 48px;">
                   <option value="">Selecione uma categoria</option>
                   {% for cat in categorias %}
-                    <option value="{{ cat.id }}">{{ cat.nome }}</option>
+                  <option value="{{ cat.id }}">{{ cat.nome }}</option>
                   {% endfor %}
                 </select>
               </div>
@@ -69,34 +70,40 @@
               <div class="form-group flex-1">
                 <label class="form-label">Preço (€)</label>
                 <div style="position: relative;">
-                  <input type="number" name="preco" class="form-control" step="0.01" min="0" placeholder="0.00" style="padding-left: 30px;">
-                  <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);">€</span>
+                  <input type="number" name="preco" class="form-control" step="0.01" min="0" placeholder="0.00"
+                    style="padding-left: 30px;">
+                  <span
+                    style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);">€</span>
                 </div>
                 <p class="text-secondary small mt-1">Deixe vazio se for apenas troca.</p>
               </div>
-              <div class="form-group flex-1">
-                <label class="form-label">Estado do Artigo</label>
-                <select name="estado" class="filter-select" style="height: 48px;">
-                  <option value="novo">Novo</option>
-                  <option value="usado_bueno">Usado - Em bom estado</option>
-                  <option value="usado_regular">Usado - Sinais de uso</option>
-                </select>
-              </div>
+               <div class="form-group flex-1">
+                 <label class="form-label">Estado do Artigo</label>
+                 <select name="estado" class="filter-select" style="height: 48px;">
+                   <option value="novo">Novo</option>
+                   <option value="usado_bom">Usado - Em bom estado</option>
+                   <option value="usado_regular">Usado - Sinais de uso</option>
+                 </select>
+               </div>
             </div>
 
             <!-- Localização -->
             <div class="form-group">
               <label class="form-label">Localização</label>
               <div style="position: relative;">
-                <input type="text" name="localizacao" class="form-control" placeholder="Cidade ou Região" style="padding-left: 35px;">
-                <i class="fas fa-map-marker-alt" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+                <input type="text" name="localizacao" class="form-control" placeholder="Cidade ou Região"
+                  style="padding-left: 35px;">
+                <i class="fas fa-map-marker-alt"
+                  style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
               </div>
             </div>
 
             <!-- Descrição -->
             <div class="form-group">
               <label class="form-label">Descrição Detalhada <span style="color: var(--danger);">*</span></label>
-              <textarea name="descricao" class="form-control" rows="8" required placeholder="Descreva as características técnicas, estado, acessórios incluídos, etc." minlength="20"></textarea>
+              <textarea name="descricao" class="form-control" rows="8" required
+                placeholder="Descreva as características técnicas, estado, acessórios incluídos, etc."
+                minlength="20"></textarea>
               <div class="d-flex justify-between mt-1">
                 <p class="text-secondary small">Mínimo 20 caracteres.</p>
                 <p class="text-secondary small" id="charCount">0 / 2000</p>
@@ -106,13 +113,30 @@
             <!-- Imagens -->
             <div class="form-group">
               <label class="form-label">Fotografias (Máx. 10)</label>
-              <div class="upload-zone" style="border: 2px dashed var(--border); border-radius: var(--radius-md); padding: 30px; text-align: center; background: #fafafa; cursor: pointer; transition: var(--transition-base);">
-                <i class="fas fa-cloud-upload-alt" style="font-size: 32px; color: var(--primary); margin-bottom: 12px;"></i>
+              <div class="upload-zone"
+                style="border: 2px dashed var(--border); border-radius: var(--radius-md); padding: 30px; text-align: center; background: #fafafa; cursor: pointer; transition: var(--transition-base);">
+                <i class="fas fa-cloud-upload-alt"
+                  style="font-size: 32px; color: var(--primary); margin-bottom: 12px;"></i>
                 <p style="font-weight: 600; margin-bottom: 4px;">Clique para selecionar imagens</p>
                 <p class="text-secondary small">JPEG, PNG, WEBP (Máx. 5MB cada)</p>
-                <input type="file" name="imagens" class="form-control" multiple accept="image/*" style="display: none;" id="imageInput">
+                <input type="file" name="imagens" class="form-control" multiple accept="image/*" style="display: none;"
+                  id="imageInput">
               </div>
               <div id="imagePreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+            </div>
+
+            <!-- Opção de Destaque do Anúncio -->
+            <div class="form-group" style="margin-top: 20px; padding: 16px; border: 2px dashed var(--border); border-radius: 8px; background: #f8fafc;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" name="destacar" id="destacarCheck" style="width: 20px; height: 20px; accent-color: var(--primary);">
+                <div>
+                  <div style="font-weight: 600; font-size: 1.1rem;">Destacar Anúncio</div>
+                  <div class="text-secondary small" style="margin-top: 2px;">Aumente a visibilidade do seu anúncio por apenas <strong>4,50 €</strong></div>
+                </div>
+              </label>
+              <p class="text-secondary small mt-1" style="margin-left: 30px; margin-top: 8px;">
+                <i class="fas fa-info-circle"></i> Anúncios destacados aparecem no topo dos resultados e ganham mais visualizações.
+              </p>
             </div>
 
             <!-- Botão de Submissão -->
@@ -143,13 +167,13 @@
   }
 
   // Image preview (basic)
-  document.getElementById('imageInput').addEventListener('change', function() {
+  document.getElementById('imageInput').addEventListener('change', function () {
     const preview = document.getElementById('imagePreview');
     preview.innerHTML = '';
     if (this.files) {
       [...this.files].forEach(file => {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
           const div = document.createElement('div');
           div.className = 'preview-item';
           div.style.cssText = 'width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border);';
